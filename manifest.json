@@ -1,0 +1,10 @@
+{
+    "name": "Document To Calendar Events",
+    "description": "Turns screenshots or uploads of documents into events in your calendar.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "./popup/popup.html",
+        "default_icon": "./popup/images/logo_2.png"
+    }
+}
