@@ -38,9 +38,8 @@ body {
 .option-btns {
     height: var(--option-btns-heights);
     width: 95%;
-    border: 0.5px solid gray;
+    border-color: gray;
     background-color: white;
-    cursor: pointer;
 }
 
 .option-btns:hover {
@@ -50,6 +49,7 @@ body {
 .option-gif {
     height: var(--option-gif-height);
     width: 100%;
+    margin-top: 2.5px;
     margin-bottom: 2.5px;
     border: 0.5px solid black;
 }
@@ -62,7 +62,8 @@ body {
     flex-direction: row;
     align-items: center;
     column-gap: 10px;
-    margin: 5px 0 5px 0;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 #file-selected-text {
@@ -70,11 +71,14 @@ body {
 }
 
 #cancel-file-btn {
-    display: none;
     min-height: 20px;
     min-width: 20px;
     background-color: red;
     border-radius: 40px;
+}
+
+#submit-btn {
+    cursor: pointer;
 }
 
 #other-btn-container {
