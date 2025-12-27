@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="./popup.css">
+    </head>
+    <body>
+        <h2 id="title-text">Document To Calander Events</h2>
+        <h3 id="creator-text">By: Daniel Burnayev</h3>
+
+        <div id="option-btn-container">
+            <button id="screenshot-btn" class="option-btns">Screenshot Document</button>
+            <div id="screenshot-gif" class="option-gif hidden-stuff"></div>
+
+            <h2 id="or-text">OR</h2>
+
+            <div id="upload-gif" class="option-gif hidden-stuff"></div>
+            <button id="upload-btn" class="option-btns">
+                Upload Document
+                <input type="file" id="actual-file-selector" class="hidden-stuff"/> <!-- always invisible file input selector -->
+            </button>
+            <div id="selected-file-stuff" class="hidden-stuff">
+                <p id="file-selected-text">No File Selected</p>
+                <button id="cancel-file-btn">X</button>
+            </div>
+
+            <input type="submit" id="submit-btn" class="option-btns hidden-stuff" title="Submit Document"/>
+        </div>
+
+        <div id="other-btn-container">
+            <p id="version-txt">Version<br>1.0</p>
+            <a href="https://github.com/danielburnayev/Document-To-Calendar-Event-Extension" target="_blank">
+                <button id="github-btn">GitHub</button>
+            </a>
+            <button id="settings-btn"></button>
+        </div>
+
+        <script src="./thing.js"></script>
+    </body>
+</html>

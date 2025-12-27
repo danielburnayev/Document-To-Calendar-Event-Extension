@@ -1,0 +1,115 @@
+/* Variables */
+:root {
+    --min-body-width: 300px;
+    --body-top-padding: 10px;
+
+    --option-btn-container-width: 175px;
+    --option-gif-height: 80px;
+    --option-btns-heights: 35px;
+
+    --other-btn-container-top-margin: 30px;
+    --other-btn-container-btn-height: 25px;
+}
+
+body {
+    min-width: var(--min-body-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: var(--body-top-padding);
+    margin: 0;
+}
+
+#title-text, #creator-text {
+    margin-block-start: 0;
+    margin-block-end: 0;
+    margin-bottom: 10px;
+}
+
+#option-btn-container {
+    width: var(--option-btn-container-width);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.option-btns {
+    height: var(--option-btns-heights);
+    width: 95%;
+    border: 0.5px solid gray;
+    background-color: white;
+    cursor: pointer;
+}
+
+.option-btns:hover {
+    background-color: gray;
+}
+
+.option-gif {
+    height: var(--option-gif-height);
+    width: 100%;
+    margin-bottom: 2.5px;
+    border: 0.5px solid black;
+}
+
+.hidden-stuff {
+    display: none;
+}
+
+#selected-file-stuff {
+    flex-direction: row;
+    align-items: center;
+    column-gap: 10px;
+    margin: 5px 0 5px 0;
+}
+
+#file-selected-text {
+    margin: 0;
+}
+
+#cancel-file-btn {
+    display: none;
+    min-height: 20px;
+    min-width: 20px;
+    background-color: red;
+    border-radius: 40px;
+}
+
+#other-btn-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 0.5px solid black;
+    margin-top: var(--other-btn-container-top-margin);
+}
+
+#version-txt {
+    margin-left: 5px;
+    text-align: center;
+}
+
+#github-btn {
+    height: var(--other-btn-container-btn-height);
+    width: 50px;
+    border-radius: 10px;
+}
+
+#settings-btn {
+    height: var(--other-btn-container-btn-height);
+    width: 25px;
+    border-radius: 50px;
+    border-color: black;
+    margin-right: 5px;
+}
+
+button {
+    cursor: pointer;
+    border-width: 0.5px;
+    border-style: solid;
+    padding-block: 0;
+    padding-inline: 0;
+}

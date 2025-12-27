@@ -4,7 +4,8 @@
     "version": "1.0",
     "manifest_version": 3,
     "action": {
-        "default_popup": "./popup/popup.html",
+        "default_popup": "./popup/src/popup.html",
         "default_icon": "./popup/images/logo_2.png"
-    }
+    },
+    "permissions": []
 }
