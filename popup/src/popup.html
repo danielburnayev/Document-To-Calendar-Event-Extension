@@ -15,7 +15,7 @@
             <div id="upload-gif" class="option-gif hidden-stuff"></div>
             <button id="upload-btn" class="option-btns">
                 Upload Document
-                <input type="file" id="actual-file-selector" class="hidden-stuff"/> <!-- always invisible file input selector -->
+                <input type="file" id="actual-file-selector" class="hidden-stuff" accept="image/png, image/jpeg, image/webp, image/heic, image/heif"/> <!-- always invisible file input selector -->
             </button>
 
             <div id="selected-file-stuff" class="hidden-stuff">
@@ -23,7 +23,7 @@
                 <button id="cancel-file-btn" class="hidden-stuff">X</button>
             </div>
 
-            <input type="submit" id="submit-btn" class="option-btns hidden-stuff" title="Submit Document"/>
+            <button id="submit-btn" class="option-btns hidden-stuff">Submit</button>
         </div>
 
         <div id="other-btn-container">
@@ -34,6 +34,6 @@
             <button id="settings-btn"></button>
         </div>
 
-        <script src="./init_gui.js"></script>
+        <script type="module" src="./init_gui.js"></script>
     </body>
 </html>

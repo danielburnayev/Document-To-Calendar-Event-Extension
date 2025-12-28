@@ -77,10 +77,6 @@ body {
     border-radius: 40px;
 }
 
-#submit-btn {
-    cursor: pointer;
-}
-
 #other-btn-container {
     width: 100%;
     display: flex;

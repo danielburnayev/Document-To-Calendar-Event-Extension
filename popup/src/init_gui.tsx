@@ -33,7 +33,7 @@ function init() {
     const submitButton: HTMLInputElement | null = document.getElementById("submit-btn") as HTMLInputElement;
 
     let fileChosen: boolean = false;
-    let screenshotTaken: boolean = false;
+    let screenshotTaken: boolean = false; //work more on the screenshot section later
 
     if (!allItemsPresent([uploadButton, fileSelector, fileSelectorContent, submitButton, fileSelectedText, cancelFileButton, screenshotButton, orText, uploadGif])) {
         return;
@@ -98,6 +98,18 @@ function init() {
         makeObjectVisible(screenshotButton);
         makeObjectVisible(orText);
         fileSelector.value = '';
+    };
+
+    submitButton.onclick = function () {
+        const reader: FileReader = new FileReader();
+        if (fileSelector.files[0]) {
+            reader.readAsDataURL(fileSelector.files[0]);
+
+            reader.onloadend = function () {
+                const fileType: string = fileSelector.files[0].type;
+                const base64ImgData: string = (reader.result as string).split(",")[1];
+            };
+        }
     };
 }
 
