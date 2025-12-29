@@ -16,14 +16,27 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: var(--body-top-padding);
     margin: 0;
 }
 
-#title-text, #creator-text {
+#text-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: var(--body-top-padding);
+}
+
+#text-container > * {
     margin-block-start: 0;
     margin-block-end: 0;
-    margin-bottom: 10px;
+}
+
+#title-text {
+    margin-bottom: 5px;
+}
+
+#creator-text {
+    margin-bottom: 30px;
 }
 
 #option-btn-container {

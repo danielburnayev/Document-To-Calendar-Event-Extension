@@ -3,8 +3,10 @@
         <link rel="stylesheet" href="./popup.css">
     </head>
     <body>
-        <h2 id="title-text">Document To Calander Events</h2>
-        <h3 id="creator-text">By: Daniel Burnayev</h3>
+        <div id="text-container">
+            <h2 id="title-text">Document To Calander Events</h2>
+            <h3 id="creator-text">By: Daniel Burnayev</h3>
+        </div>
 
         <div id="option-btn-container">
             <button id="screenshot-btn" class="option-btns">Screenshot Document</button>
@@ -17,14 +19,13 @@
                 Upload Document
                 <input type="file" id="actual-file-selector" class="hidden-stuff" accept="image/png, image/jpeg, image/webp, image/heic, image/heif"/> <!-- always invisible file input selector -->
             </button>
-
-            <div id="selected-file-stuff" class="hidden-stuff">
-                <p id="file-selected-text"></p>
-                <button id="cancel-file-btn" class="hidden-stuff">X</button>
-            </div>
-
-            <button id="submit-btn" class="option-btns hidden-stuff">Submit</button>
         </div>
+
+        <div id="selected-file-stuff" class="hidden-stuff">
+            <p id="file-selected-text"></p>
+            <button id="cancel-file-btn" class="hidden-stuff">X</button>
+        </div>
+        <button id="submit-btn" class="option-btns hidden-stuff">Submit</button>
 
         <div id="other-btn-container">
             <p id="version-txt">Version<br>1.0</p>
