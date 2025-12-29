@@ -18,9 +18,6 @@ function init() {
     function forceExtensionHeight(newHeight) {
         theHTMLElement.style.height = newHeight;
     }
-    function changeCSSVariableValue(cssVariableName, newValue) {
-        document.documentElement.style.setProperty(cssVariableName, newValue);
-    }
     const ogHeight = document.body.clientHeight + "px";
     const theHTMLElement = document.querySelector('html');
     const screenshotButton = document.getElementById("screenshot-btn");
