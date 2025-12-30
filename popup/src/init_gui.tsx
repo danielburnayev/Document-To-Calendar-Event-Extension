@@ -23,6 +23,10 @@ function init() {
         theHTMLElement!.style.height = newHeight;
     }
 
+    function changeCSSVariableValue(cssVariableName: string, newValue: string): void {
+        document.documentElement.style.setProperty(cssVariableName, newValue);
+    }
+
     const ogHeight: string = document.body.clientHeight + "px";
     const theHTMLElement : HTMLElement | null = document.querySelector('html');
     const screenshotButton: HTMLButtonElement | null = document.getElementById("screenshot-btn") as HTMLButtonElement;
