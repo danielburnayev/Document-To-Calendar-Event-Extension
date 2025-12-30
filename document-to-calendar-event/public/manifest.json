@@ -1,0 +1,16 @@
+{
+    "name": "Document To Calendar Events",
+    "description": "Turns screenshots or uploads of documents into events in your Google Calendar.",
+    "version": "1.0",
+    "manifest_version": 3,
+    "action": {
+        "default_popup": "./src/popup.html",
+        "default_icon": "./icons/logo_2.png"
+    },
+    "permissions": [
+        "activeTab",
+        "scripting",
+        "tabs",
+        "tabCapture"
+    ]
+}
