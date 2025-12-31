@@ -1,5 +1,3 @@
-import html2canvas from 'html2canvas';
-
 function init() {
     function makeObjectHidden(obj: HTMLElement | null): void {
         obj!.classList.add("hidden-stuff");
@@ -44,7 +42,8 @@ function init() {
     let fileChosen: boolean = false;
     let screenshotTaken: boolean = false;
     let screenshotInProgress: boolean = false;
-    let currTab: chrome.tabs.Tab | null = null;
+    let fileType: string;
+    let base64ImgData: string;
 
     // does the null checking for us ahead of time
     if (!allItemsPresent([theHTMLElement, uploadButton, fileSelector, fileSelectorContent, submitButton, fileSelectedText, cancelFileButton, 
@@ -72,18 +71,6 @@ function init() {
         setFileSelectedText((screenshotInProgress) ? "Screenshot In Progress" : (screenshotTaken) ? "Screenshot Taken" : "");
     };
     screenshotButton.onclick = async function () {
-        // get the active tab(s)
-        let queryOptions = { active: true, currentWindow: true, lastFocusedWindow: true};
-        const currTabs = await chrome.tabs.query(queryOptions);
-
-        if (currTabs && currTabs.length > 0 && currTabs[0] && currTabs[0].url) {
-            console.log("Active Tab Object:", currTabs[0]);
-            currTab = currTabs[0];
-        } else {
-            console.error("No active tab found.");
-            return;
-        }
-        
         // adjust the extension itself to be smaller to not get in the way of the screenshot
         screenshotInProgress = true;
         hideFlexContainer(optionButtonContainer);
@@ -94,90 +81,19 @@ function init() {
         makeObjectVisible(cancelFileButton);
         forceExtensionHeight(minNeededHeight + "px");
 
-        async function getBodyFromUrl(url: string) {
-            try {
-                console.log("Started fetch!");
-                const response = await fetch(url);
-                console.log("Ended fetch!");
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-            
-                const htmlString = await response.text();
-                const parser = new DOMParser();
-            
-                const externalDocument = parser.parseFromString(htmlString, 'text/html');
-                const externalBody = externalDocument.body;
-            
-                console.log("Returning object!");
-                return externalBody;
-            } catch (error) {
-                console.error("Could not fetch the document body:", error);
-                return null;
+        //take screenshot
+        await chrome.tabs.captureVisibleTab({ format: 'png' }).then(
+            function (dataURL) {
+                fileType = "image/png"
+                base64ImgData = dataURL.split(",")[1];
+            },
+            function (error) {
+                console.error(error);
             }
-        }
-          
-        let siteBody: HTMLElement | null = await getBodyFromUrl(currTab!.url!);
-        if (!siteBody) {return;}
-
-        let canvasRepr: HTMLCanvasElement = await html2canvas(document.body);
-        canvasRepr.toBlob((blob: Blob | null) => {
-            if (blob) {
-                const reader: FileReader = new FileReader();
-                if (fileSelector!.files && fileSelector!.files[0]) {
-                    reader.readAsDataURL(blob);
-
-                    reader.onloadend = function () {
-                        const fileType: string = blob.type;
-                        const base64ImgData: string = (reader.result as string).split(",")[1];
-
-                        console.log("File Type: " + fileType);
-                        console.log("The DATA: " + base64ImgData);
-                    };
-                }
-            }
-        });
-
-        console.log("end of da thing!");
-
-
-    
-          
-
-        //if (!(currTab!.url?.includes('chrome://'))) {
-            // let screenshot: Blob | null;
-
-            // async function thing() {
-            //     let thing = await html2canvas(document.body);
-            //     thing.toBlob((blob) => {
-            //         screenshot = blob;
-            //     });
-            // }
-
-            // chrome.scripting.executeScript({
-            //     target: { tabId: currTab.id! },
-            //     func: thing
-            // });
-        //}
-
-        // // take the screenshot
-        // const displayMediaOptions: DisplayMediaStreamOptions = {
-        //     preferCurrentTab: false,
-        //     selfBrowserSurface: "exclude",
-        //   };
-          
-        // let captureStream;
+        );
         
-        // try {
-        //     captureStream = await navigator.mediaDevices.getDisplayMedia(displayMediaOptions);
-        //     const track = captureStream.getVideoTracks()[0];
-        //     const imageCapture = new ImageCapture(track);
-        //     const bitmap = await imageCapture.grabFrame();
-        //     // You can then use the ImageBitmap for further processing (e.g., drawing it onto a canvas)
-        //     track.stop(); // Stop the stream
-        // } catch (err) {
-        //     console.error(`Error: ${err}`);
-        // }
+        console.log(fileType)
+        console.log(base64ImgData);
     };
 
     uploadButton.onmouseover = function () {
@@ -201,6 +117,18 @@ function init() {
     fileSelector.onchange = function () {
         if (fileSelector.files && fileSelector.files.length == 1) {
             setFileSelectedText(fileSelector.files[0].name);
+
+            const reader: FileReader = new FileReader();
+            if (fileSelector.files && fileSelector.files[0]) {
+                reader.readAsDataURL(fileSelector.files[0]);
+                reader.onloadend = function () {
+                    fileType = fileSelector.files![0].type;
+                    base64ImgData = (reader.result as string).split(",")[1];
+
+                    console.log(fileType);
+                    console.log(base64ImgData);
+                };
+            }
 
             if (!fileChosen) {
                 fileChosen = true;
@@ -244,15 +172,8 @@ function init() {
     };
 
     submitButton.onclick = function () {
-        const reader: FileReader = new FileReader();
-        if (fileSelector!.files && fileSelector!.files[0]) {
-            reader.readAsDataURL(fileSelector.files[0]);
-
-            reader.onloadend = function () {
-                const fileType: string = fileSelector!.files![0].type;
-                const base64ImgData: string = (reader.result as string).split(",")[1];
-            };
-        }
+        // bring up fileType and base64ImgData
+        // access google gemini in the backend
     };
 }
 
