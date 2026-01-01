@@ -32,6 +32,7 @@ function init() {
     const optionButtonContainer = document.getElementById("option-btn-container");
     const otherButtonContainer = document.getElementById("other-btn-container");
     const textContainer = document.getElementById("text-container");
+    const selectedFileImage = document.getElementById("selected-file-image");
     let fileChosen = false;
     let screenshotTaken = false;
     let screenshotInProgress = false;
@@ -39,7 +40,7 @@ function init() {
     let base64ImgData;
     // does the null checking for us ahead of time
     if (!allItemsPresent([theHTMLElement, uploadButton, fileSelector, fileSelectorContent, submitButton, fileSelectedText, cancelFileButton,
-        screenshotButton, orText, uploadGif, optionButtonContainer, otherButtonContainer, textContainer])) {
+        screenshotButton, orText, uploadGif, optionButtonContainer, otherButtonContainer, textContainer, selectedFileImage])) {
         return;
     }
     forceExtensionHeight(ogHeight);
@@ -60,7 +61,7 @@ function init() {
             hideFlexContainer(fileSelectorContent);
             forceExtensionHeight(ogHeight);
         }
-        setFileSelectedText((screenshotInProgress) ? "Screenshot In Progress" : (screenshotTaken) ? "Screenshot Taken" : "");
+        setFileSelectedText((screenshotInProgress) ? "Screenshot In Progress" : "");
     };
     screenshotButton.onclick = async function () {
         // adjust the extension itself to be smaller to not get in the way of the screenshot
@@ -77,14 +78,22 @@ function init() {
             function (dataURL) {
                 fileType = "image/png"
                 base64ImgData = dataURL.split(",")[1];
+
+                selectedFileImage.src = dataURL;
+                selectedFileImage.style.maxHeight = "150px";
             },
             function (error) {
                 console.error(error);
             }
         );
-        
-        console.log(fileType)
-        console.log(base64ImgData);
+
+        screenshotInProgress = false;
+        screenshotTaken = true;
+        setFileSelectedText("Screenshot Taken");
+        showFlexContainer(otherButtonContainer);
+        showFlexContainer(textContainer);
+        makeObjectVisible(submitButton);
+        forceExtensionHeight(ogHeight);
     };
     uploadButton.onmouseover = function () {
         makeObjectHidden(screenshotButton);
@@ -116,8 +125,8 @@ function init() {
                     fileType = fileSelector.files[0].type;
                     base64ImgData = reader.result.split(",")[1];
 
-                    console.log(fileType);
-                    console.log(base64ImgData);
+                    selectedFileImage.src = reader.result;
+                    selectedFileImage.style.maxHeight = "150px";
                 };
             }
 
@@ -133,27 +142,35 @@ function init() {
         }
     };
     cancelFileButton.onclick = function () {
+        setFileSelectedText("");
+        makeObjectHidden(cancelFileButton);
+
         if (fileChosen) {
             fileChosen = false;
-            setFileSelectedText("");
             makeObjectHidden(uploadGif);
             hideFlexContainer(fileSelectorContent);
             makeObjectHidden(submitButton);
-            makeObjectHidden(cancelFileButton);
             makeObjectVisible(screenshotButton);
             makeObjectVisible(orText);
             fileSelector.value = '';
+
+            selectedFileImage.src = '';
+            selectedFileImage.removeAttribute("style");
         }
         else if (screenshotInProgress) {
             screenshotInProgress = false;
-            setFileSelectedText("");
             showFlexContainer(optionButtonContainer);
             showFlexContainer(otherButtonContainer);
             showFlexContainer(textContainer);
-            makeObjectHidden(cancelFileButton);
             forceExtensionHeight(ogHeight);
         }
         else if (screenshotTaken) {
+            screenshotTaken = false;
+            showFlexContainer(optionButtonContainer);
+            makeObjectHidden(submitButton);
+
+            selectedFileImage.src = '';
+            selectedFileImage.removeAttribute("style");
         }
         else {
             console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");
