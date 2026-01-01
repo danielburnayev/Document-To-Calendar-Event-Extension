@@ -47,36 +47,39 @@ function init() {
     screenshotButton.onmouseover = function () {
         makeObjectHidden(orText);
         makeObjectHidden(uploadButton);
-        makeObjectVisible(screenshotGif);
         showFlexContainer(fileSelectorContent);
         if (!screenshotTaken) {
+            makeObjectVisible(screenshotGif);
             setFileSelectedText("No Screenshot Taken");
         }
     };
     screenshotButton.onmouseleave = function () {
-        makeObjectVisible(orText);
-        makeObjectVisible(uploadButton);
         makeObjectHidden(screenshotGif);
         if (!screenshotInProgress && !screenshotTaken) {
+            makeObjectVisible(orText);
+            makeObjectVisible(uploadButton);
             hideFlexContainer(fileSelectorContent);
             forceExtensionHeight(ogHeight);
+            setFileSelectedText("");
         }
-        setFileSelectedText((screenshotInProgress) ? "Screenshot In Progress" : (screenshotTaken) ? "Screenshot Taken" : "");
     };
     screenshotButton.onclick = async function () {
         // adjust the extension itself to be smaller to not get in the way of the screenshot
         screenshotInProgress = true;
+        makeObjectHidden(selectedFileImage);
+        makeObjectHidden(submitButton);
 
         setTimeout(() => { // time delay to reduce very awkard, abrupt shrinking and growing
             if (screenshotInProgress) {
                 const minNeededHeight = fileSelectorContent.clientHeight;
+                setFileSelectedText("Screenshot In Progress");
                 hideFlexContainer(optionButtonContainer);
                 hideFlexContainer(otherButtonContainer);
                 hideFlexContainer(textContainer);
                 makeObjectVisible(cancelFileButton);
                 forceExtensionHeight(minNeededHeight + "px");
             }
-        }, 150);
+        }, 100);
 
         //take screenshot
         await chrome.tabs.captureVisibleTab(null, { format: 'png' }).then(
@@ -94,27 +97,30 @@ function init() {
 
         screenshotInProgress = false;
         screenshotTaken = true;
-        hideFlexContainer(optionButtonContainer);
-        makeObjectVisible(cancelFileButton);
+        setFileSelectedText("Screenshot Taken");
+        makeObjectHidden(screenshotGif);
+        showFlexContainer(optionButtonContainer);
         showFlexContainer(otherButtonContainer);
         showFlexContainer(textContainer);
+        makeObjectVisible(cancelFileButton);
+        makeObjectVisible(selectedFileImage);
         makeObjectVisible(submitButton);
         forceExtensionHeight(ogHeight);
     };
     uploadButton.onmouseover = function () {
         makeObjectHidden(screenshotButton);
         makeObjectHidden(orText);
-        makeObjectVisible(uploadGif);
         showFlexContainer(fileSelectorContent);
         if (!fileChosen) {
+            makeObjectVisible(uploadGif);
             setFileSelectedText("No File Selected");
         }
     };
     uploadButton.onmouseleave = function () {
+        makeObjectHidden(uploadGif);
         if (!fileChosen) {
             makeObjectVisible(screenshotButton);
             makeObjectVisible(orText);
-            makeObjectHidden(uploadGif);
             hideFlexContainer(fileSelectorContent);
             setFileSelectedText("");
         }
@@ -138,7 +144,6 @@ function init() {
 
             if (!fileChosen) {
                 fileChosen = true;
-                makeObjectVisible(uploadGif);
                 showFlexContainer(fileSelectorContent);
                 makeObjectVisible(submitButton);
                 makeObjectVisible(cancelFileButton);
@@ -153,7 +158,6 @@ function init() {
 
         if (fileChosen) {
             fileChosen = false;
-            makeObjectHidden(uploadGif);
             hideFlexContainer(fileSelectorContent);
             makeObjectHidden(submitButton);
             makeObjectVisible(screenshotButton);
@@ -172,8 +176,10 @@ function init() {
         }
         else if (screenshotTaken) {
             screenshotTaken = false;
-            showFlexContainer(optionButtonContainer);
             makeObjectHidden(submitButton);
+            makeObjectVisible(orText);
+            makeObjectVisible(uploadButton);
+            showFlexContainer(optionButtonContainer);
 
             selectedFileImage.src = '';
             selectedFileImage.removeAttribute("style");
@@ -185,6 +191,33 @@ function init() {
     submitButton.onclick = function () {
         // bring up fileType and base64ImgData
         // access google gemini in the backend
+
+
+        // return to the original popup setup
+        setFileSelectedText("");
+        makeObjectHidden(cancelFileButton);
+
+        if (fileChosen) {
+            fileChosen = false;
+            hideFlexContainer(fileSelectorContent);
+            makeObjectHidden(submitButton);
+            makeObjectVisible(screenshotButton);
+            makeObjectVisible(orText);
+            fileSelector.value = '';
+
+            selectedFileImage.src = '';
+            selectedFileImage.removeAttribute("style");
+        }
+        else if (screenshotTaken) {
+            screenshotTaken = false;
+            showFlexContainer(optionButtonContainer);
+            makeObjectHidden(submitButton);
+            makeObjectVisible(orText);
+            makeObjectVisible(uploadButton);
+
+            selectedFileImage.src = '';
+            selectedFileImage.removeAttribute("style");
+        }
     };
 }
 function allItemsPresent(items) {
@@ -192,7 +225,7 @@ function allItemsPresent(items) {
     for (let item of items) {
         result && (result = item !== null);
         if (!result) {
-            console.log("Not all DOM elements have been initalized as of the running of this script. Please refresh this Chrome Extension and try again.");
+            console.error("Not all DOM elements have been initalized as of the running of this script. Please refresh this Chrome Extension and try again.");
             break;
         }
     }
