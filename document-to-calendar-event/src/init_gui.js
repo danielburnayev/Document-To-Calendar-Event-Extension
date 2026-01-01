@@ -57,21 +57,26 @@ function init() {
         makeObjectVisible(orText);
         makeObjectVisible(uploadButton);
         makeObjectHidden(screenshotGif);
-        if (!screenshotInProgress) {
+        if (!screenshotInProgress && !screenshotTaken) {
             hideFlexContainer(fileSelectorContent);
             forceExtensionHeight(ogHeight);
         }
-        setFileSelectedText((screenshotInProgress) ? "Screenshot In Progress" : "");
+        setFileSelectedText((screenshotInProgress) ? "Screenshot In Progress" : (screenshotTaken) ? "Screenshot Taken" : "");
     };
     screenshotButton.onclick = async function () {
         // adjust the extension itself to be smaller to not get in the way of the screenshot
         screenshotInProgress = true;
-        hideFlexContainer(optionButtonContainer);
-        hideFlexContainer(otherButtonContainer);
-        hideFlexContainer(textContainer);
-        const minNeededHeight = fileSelectorContent.clientHeight;
-        makeObjectVisible(cancelFileButton);
-        forceExtensionHeight(minNeededHeight + "px");
+
+        setTimeout(() => { // time delay to reduce very awkard, abrupt shrinking and growing
+            if (screenshotInProgress) {
+                const minNeededHeight = fileSelectorContent.clientHeight;
+                hideFlexContainer(optionButtonContainer);
+                hideFlexContainer(otherButtonContainer);
+                hideFlexContainer(textContainer);
+                makeObjectVisible(cancelFileButton);
+                forceExtensionHeight(minNeededHeight + "px");
+            }
+        }, 150);
 
         //take screenshot
         await chrome.tabs.captureVisibleTab(null, { format: 'png' }).then(
@@ -89,7 +94,8 @@ function init() {
 
         screenshotInProgress = false;
         screenshotTaken = true;
-        setFileSelectedText("Screenshot Taken");
+        hideFlexContainer(optionButtonContainer);
+        makeObjectVisible(cancelFileButton);
         showFlexContainer(otherButtonContainer);
         showFlexContainer(textContainer);
         makeObjectVisible(submitButton);
