@@ -17,6 +17,38 @@ function init() {
     function forceExtensionHeight(newHeight) {
         theHTMLElement.style.height = newHeight;
     }
+    function addImageChanges(url) {
+        selectedFileImage.src = url;
+        selectedFileImage.style.maxHeight = "150px";
+    }
+    function removeImageChanges() {
+        selectedFileImage.src = '';
+        selectedFileImage.removeAttribute("style");
+    }
+    function resetPopupFromFileUpload() {
+        fileChosen = false;
+        hideFlexContainer(fileSelectorContent);
+        makeObjectHidden(submitButton);
+        makeObjectVisible(screenshotButton);
+        makeObjectVisible(orText);
+        removeImageChanges();
+        fileSelector.value = '';
+    }
+    function resetPopupFromScreenshotInProgress() {
+        screenshotInProgress = false;
+        showFlexContainer(optionButtonContainer);
+        showFlexContainer(otherButtonContainer);
+        showFlexContainer(textContainer);
+        forceExtensionHeight(ogHeight);
+    }
+    function resetPopupFromScreenhotTaken() {
+        screenshotTaken = false;
+        showFlexContainer(optionButtonContainer);
+        makeObjectHidden(submitButton);
+        makeObjectVisible(orText);
+        makeObjectVisible(uploadButton);
+        removeImageChanges();
+    }
     const ogHeight = document.body.clientHeight + "px";
     const theHTMLElement = document.querySelector('html');
     const screenshotButton = document.getElementById("screenshot-btn");
@@ -86,13 +118,9 @@ function init() {
             function (dataURL) {
                 fileType = "image/png"
                 base64ImgData = dataURL.split(",")[1];
-
-                selectedFileImage.src = dataURL;
-                selectedFileImage.style.maxHeight = "150px";
+                addImageChanges(dataURL);
             },
-            function (error) {
-                console.error(error);
-            }
+            function (error) {console.error(error);}
         );
 
         screenshotInProgress = false;
@@ -136,9 +164,7 @@ function init() {
                 reader.onloadend = function () {
                     fileType = fileSelector.files[0].type;
                     base64ImgData = reader.result.split(",")[1];
-
-                    selectedFileImage.src = reader.result;
-                    selectedFileImage.style.maxHeight = "150px";
+                    addImageChanges(reader.result);
                 };
             }
 
@@ -156,37 +182,10 @@ function init() {
         setFileSelectedText("");
         makeObjectHidden(cancelFileButton);
 
-        if (fileChosen) {
-            fileChosen = false;
-            hideFlexContainer(fileSelectorContent);
-            makeObjectHidden(submitButton);
-            makeObjectVisible(screenshotButton);
-            makeObjectVisible(orText);
-            fileSelector.value = '';
-
-            selectedFileImage.src = '';
-            selectedFileImage.removeAttribute("style");
-        }
-        else if (screenshotInProgress) {
-            screenshotInProgress = false;
-            showFlexContainer(optionButtonContainer);
-            showFlexContainer(otherButtonContainer);
-            showFlexContainer(textContainer);
-            forceExtensionHeight(ogHeight);
-        }
-        else if (screenshotTaken) {
-            screenshotTaken = false;
-            makeObjectHidden(submitButton);
-            makeObjectVisible(orText);
-            makeObjectVisible(uploadButton);
-            showFlexContainer(optionButtonContainer);
-
-            selectedFileImage.src = '';
-            selectedFileImage.removeAttribute("style");
-        }
-        else {
-            console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");
-        }
+        if (fileChosen) {resetPopupFromFileUpload();}
+        else if (screenshotInProgress) {resetPopupFromScreenshotInProgress();}
+        else if (screenshotTaken) {resetPopupFromScreenhotTaken();}
+        else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
     };
     submitButton.onclick = function () {
         // bring up fileType and base64ImgData
@@ -197,27 +196,9 @@ function init() {
         setFileSelectedText("");
         makeObjectHidden(cancelFileButton);
 
-        if (fileChosen) {
-            fileChosen = false;
-            hideFlexContainer(fileSelectorContent);
-            makeObjectHidden(submitButton);
-            makeObjectVisible(screenshotButton);
-            makeObjectVisible(orText);
-            fileSelector.value = '';
-
-            selectedFileImage.src = '';
-            selectedFileImage.removeAttribute("style");
-        }
-        else if (screenshotTaken) {
-            screenshotTaken = false;
-            showFlexContainer(optionButtonContainer);
-            makeObjectHidden(submitButton);
-            makeObjectVisible(orText);
-            makeObjectVisible(uploadButton);
-
-            selectedFileImage.src = '';
-            selectedFileImage.removeAttribute("style");
-        }
+        if (fileChosen) {resetPopupFromFileUpload();}
+        else if (screenshotTaken) {resetPopupFromScreenhotTaken();}
+        else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
     };
 }
 function allItemsPresent(items) {
