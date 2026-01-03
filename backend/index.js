@@ -6,20 +6,21 @@ const app = express();
 const port = 3000;
 
 // Middleware to parse JSON bodies
-app.use(express.json({limit: '19mb'}));
+app.use(express.json({limit: 20000010})); // max size of 20mb + 10bytes (20mb max image size for gemini + longest file type str being 10 bytes long)
 // Enable CORS
 app.use(cors());
 
 app.post('/', async (req, res) => {
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   const body = req.body;
   if (body) {
-    await processRawData(body.fileType, body.imageData);
-
-    res.status(200).json({ message: 'Hi!' });
+    const result = await processRawData(body.fileType, body.imageData);
+    res.status(200).json({ message: result });
   }
-  else {
-    res.status(400).json({ message: 'WRONG!!!' });
-  }
+  else {res.status(400).json({ message: 'WRONG!!!' });}
 });
 
 app.listen(port, () => {
@@ -38,13 +39,13 @@ async function processRawData(fileType, base64ImgData) {
         },
       },
       { text: "Determine if there are any events in the provided image and record any times, dates, and descriptions relating to them. \
-      Generate any results into a single JSON string." }
+      Generate any results into a single JSON string. If no events can be derived, return the string of an empty JSON object." }
     ],
     generationConfig: {
-      "temperature": 0,
-      "topP": 0,
+      "temperature": 0.01,
+      "topP": 0.01,
       "topK": 1,
     }
   });
-  console.log("The result: " + result.text);
+  return result.text
 }

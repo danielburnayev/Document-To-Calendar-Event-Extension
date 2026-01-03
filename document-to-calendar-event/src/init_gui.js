@@ -1,16 +1,4 @@
 function init() {
-    function makeObjectHidden(obj) {
-        obj.classList.add("hidden-stuff");
-    }
-    function makeObjectVisible(obj) {
-        obj.classList.remove("hidden-stuff");
-    }
-    function hideFlexContainer(obj) {
-        obj.style.display = "none";
-    }
-    function showFlexContainer(obj) {
-        obj.style.display = "flex";
-    }
     function setFileSelectedText(text) {
         fileSelectedText.textContent = text;
     }
@@ -48,6 +36,28 @@ function init() {
         makeObjectVisible(orText);
         makeObjectVisible(uploadButton);
         removeImageChanges();
+    }
+    async function setUpAndSendMessage() {
+        // bring up fileType and base64ImgData
+        // access google gemini in the backend
+        const url = "http://localhost:3000";
+        const message = {
+            fileType: fileType,
+            imageData: base64ImgData
+        };
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json' // Set the content type header
+                },
+                body: JSON.stringify(message)
+            });
+            if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
+    
+            const result = await response.json();
+            console.log(result);
+        } catch (error) {console.error(error.message);}
     }
     const ogHeight = document.body.clientHeight + "px";
     const theHTMLElement = document.querySelector('html');
@@ -188,26 +198,36 @@ function init() {
         else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
     };
     submitButton.onclick = async function () {
-        // bring up fileType and base64ImgData
-        // access google gemini in the backend
-        const url = "http://localhost:3000";
-        const message = {
-            fileType: fileType,
-            imageData: base64ImgData
-        };
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json' // Set the content type header
-                },
-                body: JSON.stringify(message)
-            });
-            if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
+        submitButton.disabled = true;
+        cancelFileButton.disabled = true;
+        if (screenshotTaken) {screenshotButton.disabled = true;}
+        else if (fileChosen) {uploadButton.disabled = true;}
+        else {console.error("This disabling shouldn't be possible!");}
+        
+        const cover = document.createElement("div");
+        const loadingAnimation = document.createElement("h1");
+        cover.style.width = "100%";
+        cover.style.height = "100%";
+        cover.style.position = "absolute";
+        cover.style.display = "flex";
+        cover.style.justifyContent = "center";
+        cover.style.alignItems = "center";
+        cover.style.zIndex = "1000";
+        cover.style.backgroundColor = "rgba(128, 128, 128, 0.25)";
+        loadingAnimation.textContent = "Loading...";
 
-            const result = await response.json();
-            console.log(result);
-        } catch (error) {console.error(error.message);}
+        cover.appendChild(loadingAnimation);
+        document.body.appendChild(cover);
+        
+        await setUpAndSendMessage();
+
+        document.body.removeChild(cover);
+
+        submitButton.disabled = false;
+        cancelFileButton.disabled = false;
+        if (screenshotTaken) {screenshotButton.disabled = false;}
+        else if (fileChosen) {uploadButton.disabled = false;}
+        else {console.error("This enabling shouldn't be possible!");}
 
         // return to the original popup setup
         setFileSelectedText("");
@@ -228,5 +248,17 @@ function allItemsPresent(items) {
         }
     }
     return result;
+}
+function makeObjectHidden(obj) {
+    obj.classList.add("hidden-stuff");
+}
+function makeObjectVisible(obj) {
+    obj.classList.remove("hidden-stuff");
+}
+function hideFlexContainer(obj) {
+    obj.style.display = "none";
+}
+function showFlexContainer(obj) {
+    obj.style.display = "flex";
 }
 init();
