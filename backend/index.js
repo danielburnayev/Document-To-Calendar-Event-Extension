@@ -31,14 +31,20 @@ async function processRawData(fileType, base64ImgData) {
   const result = await ai.models.generateContent({
     model: "gemini-2.5-flash-lite",
     contents: [
-    {
-      inlineData: {
-        mimeType: fileType,
-        data: base64ImgData,
+      {
+        inlineData: {
+          mimeType: fileType,
+          data: base64ImgData,
+        },
       },
-    },
-    { text: "Determine if there are any events in the provided image and record any times, dates, and descriptions relating to them. Generate any results into a single JSON string." }
-  ],
+      { text: "Determine if there are any events in the provided image and record any times, dates, and descriptions relating to them. \
+      Generate any results into a single JSON string." }
+    ],
+    generationConfig: {
+      "temperature": 0,
+      "topP": 0,
+      "topK": 1,
+    }
   });
   console.log("The result: " + result.text);
 }
