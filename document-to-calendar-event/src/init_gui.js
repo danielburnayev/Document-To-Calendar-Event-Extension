@@ -187,10 +187,27 @@ function init() {
         else if (screenshotTaken) {resetPopupFromScreenhotTaken();}
         else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
     };
-    submitButton.onclick = function () {
+    submitButton.onclick = async function () {
         // bring up fileType and base64ImgData
         // access google gemini in the backend
+        const url = "http://localhost:3000";
+        const message = {
+            fileType: fileType,
+            imageData: base64ImgData
+        };
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json' // Set the content type header
+                },
+                body: JSON.stringify(message)
+            });
+            if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
 
+            const result = await response.json();
+            console.log(result);
+        } catch (error) {console.error(error.message);}
 
         // return to the original popup setup
         setFileSelectedText("");
