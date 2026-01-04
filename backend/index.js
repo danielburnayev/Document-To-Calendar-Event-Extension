@@ -11,13 +11,12 @@ app.use(express.json({limit: 20000010})); // max size of 20mb + 10bytes (20mb ma
 app.use(cors());
 
 app.post('/', async (req, res) => {
-  function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+  function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
 
   const body = req.body;
   if (body) {
     const result = await processRawData(body.fileType, body.imageData);
+    await sleep(300); // time buffer to prevent loading screen from immediately blinking in and out
     res.status(200).json({ message: result });
   }
   else {res.status(400).json({ message: 'WRONG!!!' });}
@@ -44,8 +43,8 @@ async function processRawData(fileType, base64ImgData) {
     generationConfig: {
       "temperature": 0.01,
       "topP": 0.01,
-      "topK": 1,
+      "topK": 2,
     }
   });
-  return result.text
+  return result.text;
 }

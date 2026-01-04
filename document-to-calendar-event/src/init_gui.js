@@ -37,7 +37,14 @@ function init() {
         makeObjectVisible(uploadButton);
         removeImageChanges();
     }
-    async function setUpAndSendMessage() {
+    function setDisabledForButtons(isDisabled) {
+        submitButton.disabled = isDisabled;
+        cancelFileButton.disabled = isDisabled;
+        if (screenshotTaken) {screenshotButton.disabled = isDisabled;}
+        else if (fileChosen) {uploadButton.disabled = isDisabled;}
+        else {console.error("This shouldn't be possible!");}
+    }
+    async function sendMessage() {
         // bring up fileType and base64ImgData
         // access google gemini in the backend
         const url = "http://localhost:3000";
@@ -198,41 +205,42 @@ function init() {
         else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
     };
     submitButton.onclick = async function () {
-        submitButton.disabled = true;
-        cancelFileButton.disabled = true;
-        if (screenshotTaken) {screenshotButton.disabled = true;}
-        else if (fileChosen) {uploadButton.disabled = true;}
-        else {console.error("This disabling shouldn't be possible!");}
+        setDisabledForButtons(true);
         
+        let receivedData = false;
+        let coverSet = false;
         const cover = document.createElement("div");
-        const loadingAnimation = document.createElement("h1");
-        cover.style.width = "100%";
-        cover.style.height = "100%";
-        cover.style.position = "absolute";
-        cover.style.display = "flex";
-        cover.style.justifyContent = "center";
-        cover.style.alignItems = "center";
-        cover.style.zIndex = "1000";
-        cover.style.backgroundColor = "rgba(128, 128, 128, 0.25)";
-        loadingAnimation.textContent = "Loading...";
-
-        cover.appendChild(loadingAnimation);
         document.body.appendChild(cover);
+
+        setTimeout(() => {
+            if (!receivedData) {
+                cover.style.width = "100%";
+                cover.style.height = "100%";
+                cover.style.position = "absolute";
+                cover.style.display = "flex";
+                cover.style.justifyContent = "center";
+                cover.style.alignItems = "center";
+                cover.style.zIndex = "1000";
+                cover.style.backgroundColor = "rgba(128, 128, 128, 0.25)";
+
+                const loadingAnimation = document.createElement("h1");
+                loadingAnimation.textContent = "Loading...";
+
+                cover.appendChild(loadingAnimation);
+                coverSet = true;
+            }
+        }, 100);
         
-        await setUpAndSendMessage();
+        await sendMessage();
 
-        document.body.removeChild(cover);
+        receivedData = true;
+        if (coverSet) {document.body.removeChild(cover);}
 
-        submitButton.disabled = false;
-        cancelFileButton.disabled = false;
-        if (screenshotTaken) {screenshotButton.disabled = false;}
-        else if (fileChosen) {uploadButton.disabled = false;}
-        else {console.error("This enabling shouldn't be possible!");}
+        setDisabledForButtons(false);
 
         // return to the original popup setup
         setFileSelectedText("");
         makeObjectHidden(cancelFileButton);
-
         if (fileChosen) {resetPopupFromFileUpload();}
         else if (screenshotTaken) {resetPopupFromScreenhotTaken();}
         else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
