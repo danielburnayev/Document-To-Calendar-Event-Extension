@@ -64,7 +64,7 @@ function init() {
     
             const result = await response.json();
             console.log(result);
-            console.log(result.message);
+            console.log(JSON.parse(result.message));
         } catch (error) {console.error(error.message);}
     }
     const ogHeight = document.body.clientHeight + "px";

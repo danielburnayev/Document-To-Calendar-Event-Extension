@@ -29,7 +29,7 @@ app.listen(port, () => {
 async function imageDataIntoCalendarJson(fileType, base64ImgData) {
   const ai = new GoogleGenAI({});
   const prompt = 
-  `Determine if there are any events in the provided image and format the results in a JSON array filled with JSON objects called events akin to the request bodies of the Event resource from the Google Calendar API.
+  `Determine if there are any events in the provided image and format the results in a JSON string containing one JSON array filled with JSON objects called events that are the request bodies of the Event resource from the Google Calendar API.
   Each event be its own JSON object, at least containing key-value pairs for "start" and "end" as provided below:
   
   {
@@ -37,9 +37,9 @@ async function imageDataIntoCalendarJson(fileType, base64ImgData) {
     "end": {}
   }
   
-
-  Include as many optional properties within the as needed to represent the event(s) accurately.
-  If no events can be derived, return an empty JSON array.`;
+  Include as many optional yet necessary properties within the as needed to represent the event(s) accurately.
+  Do not add unnecessary characters that would prettyprint the JSON string.
+  If no events can be derived, return the following JSON string: "[]"`;
 
   const result = await ai.models.generateContent({
     model: "gemini-2.5-flash-lite",
