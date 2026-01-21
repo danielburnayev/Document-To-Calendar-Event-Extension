@@ -21,9 +21,6 @@ app.post('/', async (req, res) => {
 
   try {
     const resultJSONText = await imageDataIntoCalendarJson(body.fileType, body.imageData);
-    const events = JSON.parse(resultJSONText);
-    console.log(events);
-
     res.status(200).json({ message: resultJSONText });
   }
   catch (error) {

@@ -51,28 +51,24 @@ function init() {
             fileType: fileType,
             imageData: base64ImgData
         };
-        try {
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json' // Set the content type header
-                },
-                body: JSON.stringify(message)
-            });
-            if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
-    
-            const result = await response.json();
-            console.log(result);
-            console.log(JSON.parse(result.message));
-        } catch (error) {console.error(error.message);}
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json' // Set the content type header
+            },
+            body: JSON.stringify(message)
+        });
+        if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
+
+        const result = await response.json();
+        console.log(result);
+        console.log(result.message);
+        return result.message;
     }
     async function addEventsToCalendar(jsonString) {
         // put the resulting json 
         chrome.identity.getAuthToken({ interactive: true }, async function(token) {
-            if (chrome.runtime.lastError) {
-              console.error(chrome.runtime.lastError);
-              return;
-            }
+            if (chrome.runtime.lastError) {throw Error(chrome.runtime.lastError);}
         
             const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
               method: 'POST',
@@ -88,8 +84,11 @@ function init() {
         });
     }
     async function executeCalls() {
-        //await imageDataToJSONText();
-        await addEventsToCalendar('{"start": {date: "2026-03-01"}, "end": {"date": "2026-03-02"}, "summary": "Thing!"}');
+        try {
+            const eventsJsonStr = await imageDataToJSONText();
+            await addEventsToCalendar('{"start": {date: "2026-03-01"}, "end": {"date": "2026-03-02"}, "summary": "Thing!"}'); //change param to eventsJsonStr when imageDataToJSONText() is good
+        }
+        catch (error) {console.error(error.message);}
     }
     const ogHeight = document.body.clientHeight + "px";
     const theHTMLElement = document.querySelector('html');
