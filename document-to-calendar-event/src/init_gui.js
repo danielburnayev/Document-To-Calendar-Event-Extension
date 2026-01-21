@@ -44,8 +44,7 @@ function init() {
         else if (fileChosen) {uploadButton.disabled = isDisabled;}
         else {console.error("This shouldn't be possible!");}
     }
-    async function sendMessage() {
-        // bring up fileType and base64ImgData
+    async function imageDataToJSONText() {
         // access google gemini in the backend
         const url = "http://localhost:3000";
         const message = {
@@ -66,6 +65,31 @@ function init() {
             console.log(result);
             console.log(JSON.parse(result.message));
         } catch (error) {console.error(error.message);}
+    }
+    async function addEventsToCalendar(jsonString) {
+        // put the resulting json 
+        chrome.identity.getAuthToken({ interactive: true }, async function(token) {
+            if (chrome.runtime.lastError) {
+              console.error(chrome.runtime.lastError);
+              return;
+            }
+        
+            const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              body: jsonString
+            });
+        
+            const result = await response.json();
+            console.log('Event created:', result.htmlLink);
+        });
+    }
+    async function executeCalls() {
+        //await imageDataToJSONText();
+        await addEventsToCalendar('{"start": {date: "2026-03-01"}, "end": {"date": "2026-03-02"}, "summary": "Thing!"}');
     }
     const ogHeight = document.body.clientHeight + "px";
     const theHTMLElement = document.querySelector('html');
@@ -232,7 +256,7 @@ function init() {
             }
         }, 100);
         
-        await sendMessage();
+        await executeCalls();
 
         receivedData = true;
         if (coverSet) {document.body.removeChild(cover);}

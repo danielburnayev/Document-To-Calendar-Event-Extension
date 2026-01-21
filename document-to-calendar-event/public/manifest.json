@@ -9,7 +9,12 @@
     },
     "permissions": [
         "activeTab",
+        "identity",
         "tabs",
         "tabCapture"
-    ]
+    ],
+    "oauth2": {
+        "client_id": "509566963936-q5scbe7e13env22f0e5eat5j8m4alroh.apps.googleusercontent.com",
+        "scopes": ["https://www.googleapis.com/auth/calendar.events"]
+    }
 }
