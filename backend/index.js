@@ -32,16 +32,22 @@ app.post('/', async (req, res) => {
 async function imageDataIntoCalendarJson(fileType, base64ImgData) {
   const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
   const prompt = 
-  `Determine if there are any events in the provided image and format the results in a JSON string containing one JSON array filled with JSON objects called events that are the request bodies of the Event resource from the Google Calendar API.
-  Each event be its own JSON object, at least containing key-value pairs for "start" and "end" as provided below:
+  `Determine if there are any events in the provided image and format the results in a string containing one array filled with JSON objects called events that are the request bodies of the Event resource from the Google Calendar API.
+  Each event must be its own JSON object, containing string-JSON object pairs for "start" and "end", and string-string pair "summary" as provided below. 
+  Ensure the JSON objects for "start" and "end" have a "date" or "dateTime" field depending on whether a time can be determined for the event. If an end date/time cannot be easily determined, use the start date/time for the end date/time.
+  Ensure only "date" or "dateTime" is used within an event.
+  Ensure the string for "summary" is directly copied from the provided image to represent what the event is for.
+
+  Do not include events where dates for either "start" and "end" are not able to be determined.
+  Do not include any more properties aside from those previously mentioned.
   
   {
     "start": {},
-    "end": {}
+    "end": {},
+    "summary": ""
   }
-  
-  Include as many optional yet necessary properties within the as needed to represent the event(s) accurately.
-  Do not add additional characters that would prettyprint the JSON string.`;
+
+  The string result should be an array consisting of these events if events can be identified. If they cannot have the string be: "[]".`;
 
   const result = await ai.models.generateContent({
     model: "gemini-2.5-flash-lite",
@@ -60,6 +66,6 @@ async function imageDataIntoCalendarJson(fileType, base64ImgData) {
       "topK": 1,
     }
   });
-  
-  return result.text;
+
+  return result.text.substring(result.text.indexOf("["), result.text.lastIndexOf("]") + 1);
 }

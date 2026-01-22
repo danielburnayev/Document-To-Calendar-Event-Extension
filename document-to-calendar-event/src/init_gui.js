@@ -44,7 +44,7 @@ function init() {
         else if (fileChosen) {uploadButton.disabled = isDisabled;}
         else {console.error("This shouldn't be possible!");}
     }
-    async function imageDataToJSONText() {
+    async function imageDataToObject() {
         // access google gemini in the backend
         const url = "http://localhost:3000";
         const message = {
@@ -61,9 +61,14 @@ function init() {
         if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
 
         const result = await response.json();
+
         console.log(result);
         console.log(result.message);
-        return result.message;
+
+        const thing = JSON.parse(result.message);
+        console.log(thing);
+
+        return thing;
     }
     async function addEventsToCalendar(jsonString) {
         // put the resulting json 
@@ -85,8 +90,12 @@ function init() {
     }
     async function executeCalls() {
         try {
-            const eventsJsonStr = await imageDataToJSONText();
-            await addEventsToCalendar('{"start": {date: "2026-03-01"}, "end": {"date": "2026-03-02"}, "summary": "Thing!"}'); //change param to eventsJsonStr when imageDataToJSONText() is good
+            const events = await imageDataToObject();
+            for (let event of events) {
+                console.log(JSON.stringify(event));
+
+                await addEventsToCalendar(JSON.stringify(event));
+            }
         }
         catch (error) {console.error(error.message);}
     }
