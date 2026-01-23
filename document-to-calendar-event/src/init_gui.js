@@ -71,19 +71,30 @@ function init() {
         return thing;
     }
     async function addEventsToCalendar(jsonString) {
+        function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+
         // put the resulting json 
         chrome.identity.getAuthToken({ interactive: true }, async function(token) {
             if (chrome.runtime.lastError) {throw Error(chrome.runtime.lastError);}
         
-            const response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-              },
-              body: jsonString
-            });
-        
+            let response;
+            let retryCount = 0;
+            do {
+                if (retryCount > 0) {await sleep(10);}
+
+                response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: jsonString
+                });
+
+                retryCount++;
+            }
+            while (retryCount < 5 && response.status != 200);
+            
             const result = await response.json();
             console.log('Event created:', result.htmlLink);
         });
@@ -97,7 +108,7 @@ function init() {
                 await addEventsToCalendar(JSON.stringify(event));
             }
         }
-        catch (error) {console.error(error.message);}
+        catch (error) {console.error(error);}
     }
     const ogHeight = document.body.clientHeight + "px";
     const theHTMLElement = document.querySelector('html');
