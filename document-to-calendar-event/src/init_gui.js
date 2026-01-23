@@ -90,9 +90,6 @@ function init() {
                 waitTimeMS *= 2;
             }
             while (retryCount < 5 && (response.status == 403 || response.status == 429));
-            
-            const result = await response.json();
-            console.log('Event created:', result);
         });
     }
     async function executeCalls() {
