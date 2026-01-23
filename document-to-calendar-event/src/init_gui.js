@@ -61,50 +61,48 @@ function init() {
         if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
 
         const result = await response.json();
-
-        console.log(result);
-        console.log(result.message);
-
         const thing = JSON.parse(result.message);
-        console.log(thing);
-
         return thing;
     }
     async function addEventsToCalendar(jsonString) {
         function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
 
-        // put the resulting json 
         chrome.identity.getAuthToken({ interactive: true }, async function(token) {
             if (chrome.runtime.lastError) {throw Error(chrome.runtime.lastError);}
         
             let response;
             let retryCount = 0;
+            let waitTimeMS = 500;
             do {
-                if (retryCount > 0) {await sleep(10);}
+                if (retryCount > 0) {await sleep(waitTimeMS);}
 
                 response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: jsonString
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: jsonString
                 });
+                console.log(response);
 
                 retryCount++;
+                waitTimeMS *= 2;
             }
-            while (retryCount < 5 && response.status != 200);
+            while (retryCount < 5 && (response.status == 403 || response.status == 429));
             
             const result = await response.json();
-            console.log('Event created:', result.htmlLink);
+            console.log('Event created:', result);
         });
     }
     async function executeCalls() {
         try {
             const events = await imageDataToObject();
-            for (let event of events) {
-                console.log(JSON.stringify(event));
 
+            const loadingCoverText = document.getElementById("loading-cover-text");
+            loadingCoverText.textContent = "Adding Events...";
+
+            for (let event of events) {
                 await addEventsToCalendar(JSON.stringify(event));
             }
         }
@@ -268,7 +266,8 @@ function init() {
                 cover.style.backgroundColor = "rgba(128, 128, 128, 0.25)";
 
                 const loadingAnimation = document.createElement("h1");
-                loadingAnimation.textContent = "Loading...";
+                loadingAnimation.id = "loading-cover-text";
+                loadingAnimation.textContent = "Analyzing Image...";
 
                 cover.appendChild(loadingAnimation);
                 coverSet = true;
