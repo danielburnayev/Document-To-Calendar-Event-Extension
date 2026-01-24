@@ -8,8 +8,7 @@ export default defineConfig({
     rollupOptions: {
       // Extensions often have multiple entry points
       input: {
-        popup: resolve(__dirname, 'src/popup.html'),
-        // background: resolve(__dirname, 'src/background.ts'), // Uncomment if needed
+        popup: resolve(__dirname, 'src/popup.html')
       },
       output: {
         // Keeps filenames simple so manifest.json doesn't break

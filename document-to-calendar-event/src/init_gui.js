@@ -1,110 +1,4 @@
 function init() {
-    function setFileSelectedText(text) {
-        fileSelectedText.textContent = text;
-    }
-    function forceExtensionHeight(newHeight) {
-        theHTMLElement.style.height = newHeight;
-    }
-    function addImageChanges(url) {
-        selectedFileImage.src = url;
-        selectedFileImage.style.maxHeight = "150px";
-    }
-    function removeImageChanges() {
-        selectedFileImage.src = '';
-        selectedFileImage.removeAttribute("style");
-    }
-    function resetPopupFromFileUpload() {
-        fileChosen = false;
-        hideFlexContainer(fileSelectorContent);
-        makeObjectHidden(submitButton);
-        makeObjectVisible(screenshotButton);
-        makeObjectVisible(orText);
-        removeImageChanges();
-        fileSelector.value = '';
-    }
-    function resetPopupFromScreenshotInProgress() {
-        screenshotInProgress = false;
-        showFlexContainer(optionButtonContainer);
-        showFlexContainer(otherButtonContainer);
-        showFlexContainer(textContainer);
-        forceExtensionHeight(ogHeight);
-    }
-    function resetPopupFromScreenhotTaken() {
-        screenshotTaken = false;
-        showFlexContainer(optionButtonContainer);
-        makeObjectHidden(submitButton);
-        makeObjectVisible(orText);
-        makeObjectVisible(uploadButton);
-        removeImageChanges();
-    }
-    function setDisabledForButtons(isDisabled) {
-        submitButton.disabled = isDisabled;
-        cancelFileButton.disabled = isDisabled;
-        if (screenshotTaken) {screenshotButton.disabled = isDisabled;}
-        else if (fileChosen) {uploadButton.disabled = isDisabled;}
-        else {console.error("This shouldn't be possible!");}
-    }
-    async function imageDataToObject() {
-        // access google gemini in the backend
-        const url = "http://localhost:3000";
-        const message = {
-            fileType: fileType,
-            imageData: base64ImgData
-        };
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json' // Set the content type header
-            },
-            body: JSON.stringify(message)
-        });
-        if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
-
-        const result = await response.json();
-        const thing = JSON.parse(result.message);
-        return thing;
-    }
-    async function addEventsToCalendar(jsonString) {
-        function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
-
-        chrome.identity.getAuthToken({ interactive: true }, async function(token) {
-            if (chrome.runtime.lastError) {throw Error(chrome.runtime.lastError);}
-        
-            let response;
-            let retryCount = 0;
-            let waitTimeMS = 500;
-            do {
-                if (retryCount > 0) {await sleep(waitTimeMS);}
-
-                response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: jsonString
-                });
-                console.log(response);
-
-                retryCount++;
-                waitTimeMS *= 2;
-            }
-            while (retryCount < 5 && (response.status == 403 || response.status == 429));
-        });
-    }
-    async function executeCalls() {
-        try {
-            const events = await imageDataToObject();
-
-            const loadingCoverText = document.getElementById("loading-cover-text");
-            loadingCoverText.textContent = "Adding Events...";
-
-            for (let event of events) {
-                await addEventsToCalendar(JSON.stringify(event));
-            }
-        }
-        catch (error) {console.error(error);}
-    }
     const ogHeight = document.body.clientHeight + "px";
     const theHTMLElement = document.querySelector('html');
     const screenshotButton = document.getElementById("screenshot-btn");
@@ -121,6 +15,8 @@ function init() {
     const otherButtonContainer = document.getElementById("other-btn-container");
     const textContainer = document.getElementById("text-container");
     const selectedFileImage = document.getElementById("selected-file-image");
+    const maxRetries = 5;
+    const visualBufferMS = 100;
     let fileChosen = false;
     let screenshotTaken = false;
     let screenshotInProgress = false;
@@ -157,7 +53,7 @@ function init() {
         makeObjectHidden(selectedFileImage);
         makeObjectHidden(submitButton);
 
-        setTimeout(() => { // time delay to reduce very awkard, abrupt shrinking and growing
+        setTimeout(() => { // time delay to reduce very awkward, abrupt shrinking and growing
             if (screenshotInProgress) {
                 const minNeededHeight = fileSelectorContent.clientHeight;
                 setFileSelectedText("Screenshot In Progress");
@@ -167,7 +63,7 @@ function init() {
                 makeObjectVisible(cancelFileButton);
                 forceExtensionHeight(minNeededHeight + "px");
             }
-        }, 100);
+        }, visualBufferMS);
 
         //take screenshot
         await chrome.tabs.captureVisibleTab(null, { format: 'png' }).then(
@@ -249,17 +145,17 @@ function init() {
         let receivedData = false;
         let coverSet = false;
         const cover = document.createElement("div");
+        cover.style.width = "100%";
+        cover.style.height = "100%";
+        cover.style.zIndex = "1000";
+        cover.style.position = "absolute";
+        cover.style.display = "flex";
+        cover.style.justifyContent = "center";
+        cover.style.alignItems = "center";
         document.body.appendChild(cover);
 
         setTimeout(() => {
             if (!receivedData) {
-                cover.style.width = "100%";
-                cover.style.height = "100%";
-                cover.style.position = "absolute";
-                cover.style.display = "flex";
-                cover.style.justifyContent = "center";
-                cover.style.alignItems = "center";
-                cover.style.zIndex = "1000";
                 cover.style.backgroundColor = "rgba(128, 128, 128, 0.25)";
 
                 const loadingAnimation = document.createElement("h1");
@@ -269,9 +165,10 @@ function init() {
                 cover.appendChild(loadingAnimation);
                 coverSet = true;
             }
-        }, 100);
+        }, visualBufferMS);
         
         await executeCalls();
+        console.log("past");
 
         receivedData = true;
         if (coverSet) {document.body.removeChild(cover);}
@@ -308,5 +205,111 @@ function hideFlexContainer(obj) {
 }
 function showFlexContainer(obj) {
     obj.style.display = "flex";
+}
+function setFileSelectedText(text) {
+    fileSelectedText.textContent = text;
+}
+function forceExtensionHeight(newHeight) {
+    theHTMLElement.style.height = newHeight;
+}
+function addImageChanges(url) {
+    selectedFileImage.src = url;
+    selectedFileImage.style.maxHeight = "150px";
+}
+function removeImageChanges() {
+    selectedFileImage.src = '';
+    selectedFileImage.removeAttribute("style");
+}
+function resetPopupFromFileUpload() {
+    fileChosen = false;
+    hideFlexContainer(fileSelectorContent);
+    makeObjectHidden(submitButton);
+    makeObjectVisible(screenshotButton);
+    makeObjectVisible(orText);
+    removeImageChanges();
+    fileSelector.value = '';
+}
+function resetPopupFromScreenshotInProgress() {
+    screenshotInProgress = false;
+    showFlexContainer(optionButtonContainer);
+    showFlexContainer(otherButtonContainer);
+    showFlexContainer(textContainer);
+    forceExtensionHeight(ogHeight);
+}
+function resetPopupFromScreenhotTaken() {
+    screenshotTaken = false;
+    showFlexContainer(optionButtonContainer);
+    makeObjectHidden(submitButton);
+    makeObjectVisible(orText);
+    makeObjectVisible(uploadButton);
+    removeImageChanges();
+}
+function setDisabledForButtons(isDisabled) {
+    submitButton.disabled = isDisabled;
+    cancelFileButton.disabled = isDisabled;
+    if (screenshotTaken) {screenshotButton.disabled = isDisabled;}
+    else if (fileChosen) {uploadButton.disabled = isDisabled;}
+    else {console.error("This shouldn't be possible!");}
+}
+async function imageDataToObject() {
+    // access google gemini in the backend
+    const url = "http://localhost:3000";
+    const message = {
+        fileType: fileType,
+        imageData: base64ImgData
+    };
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json' // Set the content type header
+        },
+        body: JSON.stringify(message)
+    });
+    if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
+
+    const result = await response.json();
+    const thing = JSON.parse(result.message);
+    return thing;
+}
+async function addEventToCalendar(jsonString) {
+    function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
+
+    const calendarAPIResult = await chrome.identity.getAuthToken({ interactive: true });
+    const token = calendarAPIResult.token;
+
+    if (chrome.runtime.lastError) {throw Error(chrome.runtime.lastError);}
+
+    let response;
+    let retryCount = 0;
+    let waitTimeMS = 500;
+
+    do {
+        if (retryCount > 0) {await sleep(waitTimeMS);}
+
+        response = await fetch('https://www.googleapis.com/calendar/v3/calendars/primary/events', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: jsonString
+        });
+        console.log(response);
+
+        retryCount++;
+        waitTimeMS *= 2;
+    }
+    while (retryCount < maxRetries && (response.status == 403 || response.status == 429));
+}
+async function executeCalls() {
+    try {
+        const events = await imageDataToObject();
+
+        const loadingCoverText = document.getElementById("loading-cover-text");
+        loadingCoverText.textContent = "Adding Events...";
+
+        for (const event of events) {await addEventToCalendar(JSON.stringify(event));}
+    }
+    catch (error) {console.error(error);}
 }
 init();
