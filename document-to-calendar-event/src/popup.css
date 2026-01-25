@@ -7,7 +7,7 @@
     --option-gif-height: 80px;
     --option-btns-heights: 35px;
 
-    --other-btn-container-top-margin: 30px;
+    --misc-btn-container-top-margin: 30px;
     --other-btn-container-btn-height: 25px;
 }
 
@@ -86,7 +86,7 @@ body {
     margin: 0;
 }
 
-#cancel-file-btn {
+.cancel-btn {
     min-height: 20px;
     min-width: 20px;
     background-color: red;
@@ -100,14 +100,23 @@ body {
     object-fit: contain;
 }
 
-#other-btn-container {
+#finish-load-popup {
+    position: absolute;
+    right: 10px;
+    bottom: 60px;
+    padding: 2.5px;
+    font-size: medium;
+    text-align: center;
+}
+
+#misc-btn-container {
     width: 100%;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     border-top: 0.5px solid black;
-    margin-top: var(--other-btn-container-top-margin);
+    margin-top: var(--misc-btn-container-top-margin);
 }
 
 #version-txt {

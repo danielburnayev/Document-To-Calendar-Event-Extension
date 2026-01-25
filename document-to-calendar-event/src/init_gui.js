@@ -1,40 +1,53 @@
+class NoEventsError extends Error {
+    constructor() {
+        super("Document provided has no identifiable events.");
+        this.name = 'NoEventsError';
+    }
+}
+
+const ogHeight = document.body.clientHeight + "px";
+const theHTMLElement = document.querySelector('html');
+const screenshotButton = document.getElementById("screenshot-btn");
+const screenshotGif = document.getElementById("screenshot-gif");
+const orText = document.getElementById("or-text");
+const uploadGif = document.getElementById("upload-gif");
+const uploadButton = document.getElementById("upload-btn");
+const fileSelector = document.getElementById("actual-file-selector");
+const fileSelectorContent = document.getElementById("selected-file-stuff");
+const fileSelectedText = document.getElementById("file-selected-text");
+const cancelFileButton = document.getElementById("cancel-file-btn");
+const submitButton = document.getElementById("submit-btn");
+const optionButtonContainer = document.getElementById("option-btn-container");
+const miscButtonContainer = document.getElementById("misc-btn-container");
+const textContainer = document.getElementById("text-container");
+const selectedFileImage = document.getElementById("selected-file-image");
+const finishLoadPopup = document.getElementById("finish-load-popup");
+const maxRetries = 5;
+const visualTimeBufferMS = 100;
+const finishLoadPopupVisibleMS = 1500;
+let controller = new AbortController();
+let fileChosen = false;
+let screenshotTaken = false;
+let screenshotInProgress = false;
+let fileType;
+let base64ImgData;
+
+init();
+
 function init() {
-    const ogHeight = document.body.clientHeight + "px";
-    const theHTMLElement = document.querySelector('html');
-    const screenshotButton = document.getElementById("screenshot-btn");
-    const screenshotGif = document.getElementById("screenshot-gif");
-    const orText = document.getElementById("or-text");
-    const uploadGif = document.getElementById("upload-gif");
-    const uploadButton = document.getElementById("upload-btn");
-    const fileSelector = document.getElementById("actual-file-selector");
-    const fileSelectorContent = document.getElementById("selected-file-stuff");
-    const fileSelectedText = document.getElementById("file-selected-text");
-    const cancelFileButton = document.getElementById("cancel-file-btn");
-    const submitButton = document.getElementById("submit-btn");
-    const optionButtonContainer = document.getElementById("option-btn-container");
-    const otherButtonContainer = document.getElementById("other-btn-container");
-    const textContainer = document.getElementById("text-container");
-    const selectedFileImage = document.getElementById("selected-file-image");
-    const maxRetries = 5;
-    const visualBufferMS = 100;
-    let fileChosen = false;
-    let screenshotTaken = false;
-    let screenshotInProgress = false;
-    let fileType;
-    let base64ImgData;
     // does the null checking for us ahead of time
     if (!allItemsPresent([theHTMLElement, uploadButton, fileSelector, fileSelectorContent, submitButton, fileSelectedText, cancelFileButton,
-        screenshotButton, orText, uploadGif, optionButtonContainer, otherButtonContainer, textContainer, selectedFileImage])) {
+        screenshotButton, orText, uploadGif, optionButtonContainer, miscButtonContainer, textContainer, selectedFileImage, finishLoadPopup])) {
         return;
     }
-    forceExtensionHeight(ogHeight);
+    forceExtensionHeight(theHTMLElement, ogHeight);
     screenshotButton.onmouseover = function () {
         makeObjectHidden(orText);
         makeObjectHidden(uploadButton);
         showFlexContainer(fileSelectorContent);
         if (!screenshotTaken) {
             makeObjectVisible(screenshotGif);
-            setFileSelectedText("No Screenshot Taken");
+            setSomeText(fileSelectedText, "No Screenshot Taken");
         }
     };
     screenshotButton.onmouseleave = function () {
@@ -43,8 +56,8 @@ function init() {
             makeObjectVisible(orText);
             makeObjectVisible(uploadButton);
             hideFlexContainer(fileSelectorContent);
-            forceExtensionHeight(ogHeight);
-            setFileSelectedText("");
+            forceExtensionHeight(theHTMLElement, ogHeight);
+            setSomeText(fileSelectedText, "");
         }
     };
     screenshotButton.onclick = async function () {
@@ -56,14 +69,14 @@ function init() {
         setTimeout(() => { // time delay to reduce very awkward, abrupt shrinking and growing
             if (screenshotInProgress) {
                 const minNeededHeight = fileSelectorContent.clientHeight;
-                setFileSelectedText("Screenshot In Progress");
+                setSomeText(fileSelectedText, "Screenshot In Progress");
                 hideFlexContainer(optionButtonContainer);
-                hideFlexContainer(otherButtonContainer);
+                hideFlexContainer(miscButtonContainer);
                 hideFlexContainer(textContainer);
                 makeObjectVisible(cancelFileButton);
-                forceExtensionHeight(minNeededHeight + "px");
+                forceExtensionHeight(theHTMLElement, minNeededHeight + "px");
             }
-        }, visualBufferMS);
+        }, visualTimeBufferMS);
 
         //take screenshot
         await chrome.tabs.captureVisibleTab(null, { format: 'png' }).then(
@@ -77,15 +90,15 @@ function init() {
 
         screenshotInProgress = false;
         screenshotTaken = true;
-        setFileSelectedText("Screenshot Taken");
+        setSomeText(fileSelectedText, "Screenshot Taken");
         makeObjectHidden(screenshotGif);
         showFlexContainer(optionButtonContainer);
-        showFlexContainer(otherButtonContainer);
+        showFlexContainer(miscButtonContainer);
         showFlexContainer(textContainer);
         makeObjectVisible(cancelFileButton);
         makeObjectVisible(selectedFileImage);
         makeObjectVisible(submitButton);
-        forceExtensionHeight(ogHeight);
+        forceExtensionHeight(theHTMLElement, ogHeight);
     };
     uploadButton.onmouseover = function () {
         makeObjectHidden(screenshotButton);
@@ -93,7 +106,7 @@ function init() {
         showFlexContainer(fileSelectorContent);
         if (!fileChosen) {
             makeObjectVisible(uploadGif);
-            setFileSelectedText("No File Selected");
+            setSomeText(fileSelectedText, "No File Selected");
         }
     };
     uploadButton.onmouseleave = function () {
@@ -102,13 +115,13 @@ function init() {
             makeObjectVisible(screenshotButton);
             makeObjectVisible(orText);
             hideFlexContainer(fileSelectorContent);
-            setFileSelectedText("");
+            setSomeText(fileSelectedText, "");
         }
     };
     uploadButton.onclick = function () { fileSelector.click(); };
     fileSelector.onchange = function () {
         if (fileSelector.files && fileSelector.files.length == 1) {
-            setFileSelectedText(fileSelector.files[0].name);
+            setSomeText(fileSelectedText, fileSelector.files[0].name);
 
             const reader = new FileReader();
             if (fileSelector.files && fileSelector.files[0]) {
@@ -131,7 +144,7 @@ function init() {
         }
     };
     cancelFileButton.onclick = function () {
-        setFileSelectedText("");
+        setSomeText(fileSelectedText, "");
         makeObjectHidden(cancelFileButton);
 
         if (fileChosen) {resetPopupFromFileUpload();}
@@ -150,25 +163,35 @@ function init() {
         cover.style.zIndex = "1000";
         cover.style.position = "absolute";
         cover.style.display = "flex";
+        cover.style.flexDirection = "column";
         cover.style.justifyContent = "center";
         cover.style.alignItems = "center";
         document.body.appendChild(cover);
 
         setTimeout(() => {
             if (!receivedData) {
-                cover.style.backgroundColor = "rgba(128, 128, 128, 0.25)";
+                changeBackgroundColor(cover, "rgba(128, 128, 128, 0.25)");
 
                 const loadingAnimation = document.createElement("h1");
                 loadingAnimation.id = "loading-cover-text";
-                loadingAnimation.textContent = "Analyzing Image...";
+                setSomeText(loadingAnimation, "Analyzing Image...");
+
+                const cancelLoadButton = document.createElement("button");
+                cancelLoadButton.classList.add("cancel-btn");
+                setSomeText(cancelLoadButton, "X");
+                cancelLoadButton.onclick = function () {
+                    controller.abort();
+                    controller = new AbortController();
+                };
 
                 cover.appendChild(loadingAnimation);
+                cover.appendChild(cancelLoadButton);
+
                 coverSet = true;
             }
-        }, visualBufferMS);
+        }, visualTimeBufferMS);
         
-        await executeCalls();
-        console.log("past");
+        const error = await executeCalls();
 
         receivedData = true;
         if (coverSet) {document.body.removeChild(cover);}
@@ -176,11 +199,29 @@ function init() {
         setDisabledForButtons(false);
 
         // return to the original popup setup
-        setFileSelectedText("");
+        setSomeText(fileSelectedText, "");
         makeObjectHidden(cancelFileButton);
         if (fileChosen) {resetPopupFromFileUpload();}
         else if (screenshotTaken) {resetPopupFromScreenhotTaken();}
         else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
+
+        //temporary popup 
+        if (error) {
+            let errorText = "Unexpected Error. Try again later.";
+            if (error.name == "AbortError") {errorText = "Process Aborted";}
+            else if (error.name == "NoEventsError") {errorText = "Image With No Events";}
+
+            changeBackgroundColor(finishLoadPopup, "red");
+            setSomeText(finishLoadPopup, errorText);
+        }
+        else {
+            changeBackgroundColor(finishLoadPopup, "greenyellow");
+            setSomeText(finishLoadPopup, "Processed Events");
+        }
+        makeObjectVisible(finishLoadPopup);
+        setTimeout(() => {
+            makeObjectHidden(finishLoadPopup);
+        }, finishLoadPopupVisibleMS);
     };
 }
 function allItemsPresent(items) {
@@ -206,11 +247,14 @@ function hideFlexContainer(obj) {
 function showFlexContainer(obj) {
     obj.style.display = "flex";
 }
-function setFileSelectedText(text) {
-    fileSelectedText.textContent = text;
+function setSomeText(obj, text) {
+    obj.textContent = text;
 }
-function forceExtensionHeight(newHeight) {
-    theHTMLElement.style.height = newHeight;
+function forceExtensionHeight(obj, newHeight) {
+    obj.style.height = newHeight;
+}
+function changeBackgroundColor(obj, theColor) {
+    obj.style.backgroundColor = theColor;
 }
 function addImageChanges(url) {
     selectedFileImage.src = url;
@@ -232,9 +276,9 @@ function resetPopupFromFileUpload() {
 function resetPopupFromScreenshotInProgress() {
     screenshotInProgress = false;
     showFlexContainer(optionButtonContainer);
-    showFlexContainer(otherButtonContainer);
+    showFlexContainer(miscButtonContainer);
     showFlexContainer(textContainer);
-    forceExtensionHeight(ogHeight);
+    forceExtensionHeight(theHTMLElement, ogHeight);
 }
 function resetPopupFromScreenhotTaken() {
     screenshotTaken = false;
@@ -263,13 +307,14 @@ async function imageDataToObject() {
         headers: {
             'Content-Type': 'application/json' // Set the content type header
         },
+        signal: controller.signal,
         body: JSON.stringify(message)
     });
     if (!response.ok) {throw new Error(`Response status: ${response.status}`);}
 
     const result = await response.json();
-    const thing = JSON.parse(result.message);
-    return thing;
+    const jsonEvents = JSON.parse(result.message);
+    return jsonEvents;
 }
 async function addEventToCalendar(jsonString) {
     function sleep(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
@@ -292,6 +337,7 @@ async function addEventToCalendar(jsonString) {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
+            signal: controller.signal,
             body: jsonString
         });
         console.log(response);
@@ -304,12 +350,17 @@ async function addEventToCalendar(jsonString) {
 async function executeCalls() {
     try {
         const events = await imageDataToObject();
+        if (events.length == 0) {throw new NoEventsError();}
 
         const loadingCoverText = document.getElementById("loading-cover-text");
-        loadingCoverText.textContent = "Adding Events...";
+        if (allItemsPresent([loadingCoverText])) {setSomeText(loadingCoverText, "Adding Events...");}
 
         for (const event of events) {await addEventToCalendar(JSON.stringify(event));}
+
+        return null;
     }
-    catch (error) {console.error(error);}
+    catch (error) {
+        console.error(error);
+        return error;
+    }
 }
-init();
