@@ -28,7 +28,6 @@ app.post('/', async (req, res) => {
   }
 });
 
-//WORK ON THE PROMPT
 async function imageDataIntoCalendarJson(fileType, base64ImgData) {
   const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
   const prompt = 
