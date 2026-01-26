@@ -174,7 +174,10 @@ function init() {
 
                 const loadingAnimation = document.createElement("h1");
                 loadingAnimation.id = "loading-cover-text";
+                loadingAnimation.style.marginBottom = "2.5px";
+                loadingAnimation.style.padding = "2.5px";
                 setSomeText(loadingAnimation, "Analyzing Image...");
+                changeBackgroundColor(loadingAnimation, "white");
 
                 const cancelLoadButton = document.createElement("button");
                 cancelLoadButton.classList.add("cancel-btn");

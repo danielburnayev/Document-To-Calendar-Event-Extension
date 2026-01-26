@@ -33,23 +33,33 @@ async function imageDataIntoCalendarJson(fileType, base64ImgData) {
   const prompt = 
   `Determine if there are any events in the provided image and format the results in a string containing one array filled with JSON objects called events that are the request bodies of the Event resource from the Google Calendar API.
   Each event must be its own JSON object, containing string-JSON object pairs for "start" and "end", and string-string pair "summary" as provided below. 
-  Ensure the JSON objects for "start" and "end" have a "date" or "dateTime" field depending on whether a time can be determined for the event. If an end date/time cannot be easily determined, use the start date/time for the end date/time.
-  Ensure only "date" or "dateTime" is used within an event.
+  Ensure the JSON objects for "start" and "end" have a "date" or "dateTime" field depending on whether a time can be determined for the event, and a "timeZone" field. 
+  If a time and date are provided for an event but the specific start and/or end times cannot be confidently determined, use "date" instead of "dateTime" for the event and have the date of the event be the date provided, with no time included in the event. 
+  If a time zone cannot be confidently determined, have the time zone be "America/New_York".
   Ensure the string for "summary" is directly copied from the provided image to represent what the event is for.
 
   Do not include events where dates for either "start" and "end" are not able to be determined.
-  Do not include any more properties aside from those previously mentioned.
+  Do not include any more properties aside from those previously mentioned and reminders. The format for the reminders property is given in the event JSON object provided and shouldn't be changed.
   
   {
     "start": {},
     "end": {},
-    "summary": ""
+    "summary": "",
+    "reminders": {
+      "useDefault": false,
+      "overrides": [
+        {"method": "email", "minutes": 10080},
+        {"method": "popup", "minutes": 10080},
+        {"method": "email", "minutes": 1440},
+        {"method": "popup", "minutes": 1440}
+      ]
+    }
   }
 
   The string result should be an array consisting of these events if events can be identified. If they cannot have the string be: "[]".`;
 
   const result = await ai.models.generateContent({
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-flash",
     contents: [
       {
         inlineData: {
