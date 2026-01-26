@@ -45,7 +45,7 @@ This was made so that people can still access and use the Chrome Extension on th
 
    ``` npm run build ```
    
-10. You now have a folder named "dist" in you current directory. Go over to your Chrome Extensions page [chrome://extensions/], click on the "Load Unpacked" button in the top left corner of the page, and select only the recently created dist folder to be uploaded.
+10. You now have a folder named "dist" in you current directory. Go over to your Chrome Extensions page (chrome://extensions/), click on the "Load Unpacked" button in the top left corner of the page, and select only the recently created dist folder to be uploaded.
 ![alt text](https://github.com/danielburnayev/Document-To-Calendar-Event-Extension/blob/local/instr_imgs/upload_unpacked.png "Load Unpacked")
 ![alt text](https://github.com/danielburnayev/Document-To-Calendar-Event-Extension/blob/local/instr_imgs/select_folder.png "Select dist Folder")
 
