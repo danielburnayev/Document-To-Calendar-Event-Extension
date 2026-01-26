@@ -1,9 +1,9 @@
 import { GoogleGenAI } from '@google/genai';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 
-dotenv.config();
+// dotenv.config();
 const app = express();
 const port = 3000;
 const jsonByteLimit = 20000010;
