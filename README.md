@@ -8,7 +8,8 @@ A Chrome Extension pop-up that allows one to submit an image file or screenshot 
 
 ## Use Cases:
 1. Grid-shaped schedules:
-   <img src="https://github.com/danielburnayev/Document-To-Calendar-Event-Extension/blob/main/demo/grid-schedule.png" width="300" />
-   <img src="https://github.com/danielburnayev/Document-To-Calendar-Event-Extension/blob/main/demo/calendar-recording.gif" width="300" />
+   
+   <img src="https://github.com/danielburnayev/Document-To-Calendar-Event-Extension/blob/main/demo/grid-schedule.png" width="400" />
+   <img src="https://github.com/danielburnayev/Document-To-Calendar-Event-Extension/blob/main/demo/calendar-recording.gif" width="600" />
    
    
