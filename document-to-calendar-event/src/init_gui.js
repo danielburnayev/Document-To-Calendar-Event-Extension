@@ -22,6 +22,7 @@ const miscButtonContainer = document.getElementById("misc-btn-container");
 const textContainer = document.getElementById("text-container");
 const selectedFileImage = document.getElementById("selected-file-image");
 const finishLoadPopup = document.getElementById("finish-load-popup");
+const maxFileByteSize = 2000000;
 const maxRetries = 5;
 const visualTimeBufferMS = 100;
 const finishLoadPopupVisibleMS = 1500;
@@ -121,7 +122,7 @@ function init() {
     uploadButton.onclick = function () { fileSelector.click(); };
     fileSelector.onchange = function () {
         if (fileSelector.files && fileSelector.files.length == 1) {
-            setSomeText(fileSelectedText, fileSelector.files[0].name);
+            setSomeText(fileSelectedText, fileSelector.files[0].name && fileSelector.files[0].size <= maxFileByteSize);
 
             const reader = new FileReader();
             if (fileSelector.files && fileSelector.files[0]) {
