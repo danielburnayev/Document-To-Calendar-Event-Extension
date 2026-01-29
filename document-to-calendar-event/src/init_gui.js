@@ -121,8 +121,6 @@ function init() {
     };
     uploadButton.onclick = function () { fileSelector.click(); };
     fileSelector.onchange = function () {
-        console.log(fileSelector.files[0].size);
-
         if (fileSelector.files && fileSelector.files.length == 1 && fileSelector.files[0].size <= maxFileByteSize) {
             setSomeText(fileSelectedText, fileSelector.files[0].name);
 
