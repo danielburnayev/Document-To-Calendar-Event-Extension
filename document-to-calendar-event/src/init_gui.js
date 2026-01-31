@@ -30,6 +30,7 @@ const textContainer = document.getElementById("text-container");
 const selectedFileImage = document.getElementById("selected-file-image");
 const finishLoadPopup = document.getElementById("finish-load-popup");
 const eventsForTextbox = document.getElementById("events-for-textbox");
+const settingsButton = document.getElementById("settings-btn");
 const maxRetries = 5;
 const visualTimeBufferMS = 100;
 const finishLoadPopupVisibleMS = 1500;
@@ -48,8 +49,8 @@ function init() {
     // does the null checking for us ahead of time
     if (!allItemsPresent([theHTMLElement, uploadButton, fileSelector, fileSelectorContent, submitButton, fileSelectedText, cancelFileButton,
         screenshotButton, orText, uploadGif, optionButtonContainer, miscButtonContainer, textContainer, selectedFileImage, finishLoadPopup,
-        eventsForTextbox])) {
-        return;
+        eventsForTextbox, settingsButton])) {
+            return;
     }
     forceExtensionHeight(theHTMLElement, ogHeight);
     screenshotButton.onmouseover = function () {
@@ -179,18 +180,9 @@ function init() {
     submitButton.onclick = async function () {
         setDisabledForButtons(true);
         
+        const cover = setBarebonsCover();
         let receivedData = false;
         let coverSet = false;
-        const cover = document.createElement("div");
-        cover.style.width = "100%";
-        cover.style.height = "100%";
-        cover.style.zIndex = "1000";
-        cover.style.position = "absolute";
-        cover.style.display = "flex";
-        cover.style.flexDirection = "column";
-        cover.style.justifyContent = "center";
-        cover.style.alignItems = "center";
-        document.body.appendChild(cover);
 
         setTimeout(() => {
             if (!receivedData) {
@@ -234,6 +226,31 @@ function init() {
 
         //temporary popup 
         setFinishLoadPopup(error);
+    };
+    settingsButton.onclick = function () {
+        const cover = setBarebonsCover();
+        changeBackgroundColor(cover, "gray");
+        
+        const textboxCheckbox = document.createElement("input");
+        textboxCheckbox.type = "checkbox";
+        textboxCheckbox.id = "show-event-textbox-checkbox";
+        textboxCheckbox.value = "true";
+        textboxCheckbox.checked = showEventsForTextbox;
+
+        const textboxCheckboxLabel = document.createElement("label");
+        textboxCheckboxLabel.htmlFor = "show-event-textbox-checkbox";
+        setSomeText(textboxCheckboxLabel, "Allow Textbox To Specify Event Purpose");
+
+        const saveButton = document.createElement("button");
+        setSomeText(saveButton, "Save Changes");
+        saveButton.onclick = function () {
+            showEventsForTextbox = textboxCheckbox.checked;
+            document.body.removeChild(cover);
+        }
+
+        cover.appendChild(textboxCheckbox);
+        cover.appendChild(textboxCheckboxLabel);
+        cover.appendChild(saveButton);
     };
 }
 function setFinishLoadPopup(error) {
@@ -343,6 +360,20 @@ function setDisabledForButtons(isDisabled) {
     if (screenshotTaken) {setDisabledForObj(screenshotButton, isDisabled);}
     else if (fileChosen) {setDisabledForObj(uploadButton, isDisabled);}
     else {console.error("This shouldn't be possible!");}
+}
+function setBarebonsCover() {
+    const cover = document.createElement("div");
+    cover.style.width = "100%";
+    cover.style.height = "100%";
+    cover.style.zIndex = "1000";
+    cover.style.position = "absolute";
+    cover.style.display = "flex";
+    cover.style.flexDirection = "column";
+    cover.style.justifyContent = "center";
+    cover.style.alignItems = "center";
+    document.body.appendChild(cover);
+
+    return cover;
 }
 async function imageDataToObject() {
     // access google gemini in the backend

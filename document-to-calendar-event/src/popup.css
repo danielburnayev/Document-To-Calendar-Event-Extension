@@ -145,8 +145,12 @@ body {
     height: var(--other-btn-container-btn-height);
     width: 25px;
     border-radius: 50px;
-    border-color: black;
+    border: none;
     margin-right: 5px;
+    background-image: url("../public/icons/settings-button-icon.webp");
+    background-size: 25px 25px;
+    background-position: center;
+    background-color: transparent;
 }
 
 button {
