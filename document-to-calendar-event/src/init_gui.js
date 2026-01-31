@@ -38,6 +38,7 @@ let controller = new AbortController();
 let fileChosen = false;
 let screenshotTaken = false;
 let screenshotInProgress = false;
+let showEventsForTextbox = false;
 let fileType;
 let base64ImgData;
 
@@ -75,6 +76,10 @@ function init() {
         screenshotInProgress = true;
         makeObjectHidden(selectedFileImage);
         makeObjectHidden(submitButton);
+        if (showEventsForTextbox) {
+            setDisabledForObj(eventsForTextbox, false);
+            makeObjectVisible(eventsForTextbox);
+        }
 
         setTimeout(() => { // time delay to reduce very awkward, abrupt shrinking and growing
             if (screenshotInProgress) {
@@ -128,9 +133,13 @@ function init() {
             setSomeText(fileSelectedText, "");
         }
     };
-    uploadButton.onclick = function () { fileSelector.click(); };
+    uploadButton.onclick = function () {fileSelector.click();};
     fileSelector.onchange = function () {
         if (fileSelector.files && fileSelector.files.length == 1 && fileSelector.files[0].size <= maxFileByteSize) {
+            if (showEventsForTextbox) {
+                setDisabledForObj(eventsForTextbox, false);
+                makeObjectVisible(eventsForTextbox);
+            }
             setSomeText(fileSelectedText, fileSelector.files[0].name);
 
             const reader = new FileReader();
@@ -157,6 +166,10 @@ function init() {
     cancelFileButton.onclick = function () {
         setSomeText(fileSelectedText, "");
         makeObjectHidden(cancelFileButton);
+        if (showEventsForTextbox) {
+            setDisabledForObj(eventsForTextbox, true);
+            makeObjectHidden(eventsForTextbox);
+        }
 
         if (fileChosen) {resetPopupFromFileUpload();}
         else if (screenshotInProgress) {resetPopupFromScreenshotInProgress();}
@@ -277,6 +290,9 @@ function changeBackgroundColor(obj, theColor) {
 function turnInputBlack(obj) {
     obj.value = "";
 }
+function setDisabledForObj(obj, isDisabled) {
+    obj.disabled = isDisabled;
+}
 function addImageChanges(url) {
     selectedFileImage.src = url;
     selectedFileImage.style.maxHeight = "150px";
@@ -293,6 +309,10 @@ function resetPopupFromFileUpload() {
     makeObjectVisible(orText);
     removeImageChanges();
     turnInputBlack(fileSelector);
+    if (showEventsForTextbox) {
+        setDisabledForObj(eventsForTextbox, true);
+        makeObjectHidden(eventsForTextbox);
+    }
 }
 function resetPopupFromScreenshotInProgress() {
     screenshotInProgress = false;
@@ -300,6 +320,10 @@ function resetPopupFromScreenshotInProgress() {
     showFlexContainer(miscButtonContainer);
     showFlexContainer(textContainer);
     forceExtensionHeight(theHTMLElement, ogHeight);
+    if (showEventsForTextbox) {
+        setDisabledForObj(eventsForTextbox, true);
+        makeObjectHidden(eventsForTextbox);
+    }
 }
 function resetPopupFromScreenhotTaken() {
     screenshotTaken = false;
@@ -308,12 +332,16 @@ function resetPopupFromScreenhotTaken() {
     makeObjectVisible(orText);
     makeObjectVisible(uploadButton);
     removeImageChanges();
+    if (showEventsForTextbox) {
+        setDisabledForObj(eventsForTextbox, true);
+        makeObjectHidden(eventsForTextbox);
+    }
 }
 function setDisabledForButtons(isDisabled) {
-    submitButton.disabled = isDisabled;
-    cancelFileButton.disabled = isDisabled;
-    if (screenshotTaken) {screenshotButton.disabled = isDisabled;}
-    else if (fileChosen) {uploadButton.disabled = isDisabled;}
+    setDisabledForObj(submitButton, isDisabled);
+    setDisabledForObj(cancelFileButton, isDisabled);
+    if (screenshotTaken) {setDisabledForObj(screenshotButton, isDisabled);}
+    else if (fileChosen) {setDisabledForObj(uploadButton, isDisabled);}
     else {console.error("This shouldn't be possible!");}
 }
 async function imageDataToObject() {
@@ -364,7 +392,6 @@ async function addEventToCalendar(jsonString) {
             signal: controller.signal,
             body: jsonString
         });
-        console.log(response);
 
         retryCount++;
         waitTimeMS *= 2;
