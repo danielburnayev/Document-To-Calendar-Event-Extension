@@ -29,6 +29,7 @@ const miscButtonContainer = document.getElementById("misc-btn-container");
 const textContainer = document.getElementById("text-container");
 const selectedFileImage = document.getElementById("selected-file-image");
 const finishLoadPopup = document.getElementById("finish-load-popup");
+const eventsForTextbox = document.getElementById("events-for-textbox");
 const maxRetries = 5;
 const visualTimeBufferMS = 100;
 const finishLoadPopupVisibleMS = 1500;
@@ -45,7 +46,8 @@ init();
 function init() {
     // does the null checking for us ahead of time
     if (!allItemsPresent([theHTMLElement, uploadButton, fileSelector, fileSelectorContent, submitButton, fileSelectedText, cancelFileButton,
-        screenshotButton, orText, uploadGif, optionButtonContainer, miscButtonContainer, textContainer, selectedFileImage, finishLoadPopup])) {
+        screenshotButton, orText, uploadGif, optionButtonContainer, miscButtonContainer, textContainer, selectedFileImage, finishLoadPopup,
+        eventsForTextbox])) {
         return;
     }
     forceExtensionHeight(theHTMLElement, ogHeight);
@@ -272,6 +274,9 @@ function forceExtensionHeight(obj, newHeight) {
 function changeBackgroundColor(obj, theColor) {
     obj.style.backgroundColor = theColor;
 }
+function turnInputBlack(obj) {
+    obj.value = "";
+}
 function addImageChanges(url) {
     selectedFileImage.src = url;
     selectedFileImage.style.maxHeight = "150px";
@@ -287,7 +292,7 @@ function resetPopupFromFileUpload() {
     makeObjectVisible(screenshotButton);
     makeObjectVisible(orText);
     removeImageChanges();
-    fileSelector.value = '';
+    turnInputBlack(fileSelector);
 }
 function resetPopupFromScreenshotInProgress() {
     screenshotInProgress = false;
@@ -316,8 +321,11 @@ async function imageDataToObject() {
     const url = "http://localhost:3000";
     const message = {
         fileType: fileType,
-        imageData: base64ImgData
+        imageData: base64ImgData,
+        eventsAreForThis: eventsForTextbox.value
     };
+    turnInputBlack(eventsForTextbox);
+
     const response = await fetch(url, {
         method: "POST",
         headers: {

@@ -20,7 +20,7 @@ app.post('/', async (req, res) => {
   const body = req.body;
 
   try {
-    const resultJSONText = await imageDataIntoCalendarJson(body.fileType, body.imageData);
+    const resultJSONText = await imageDataIntoCalendarJson(body.fileType, body.imageData, body.eventsAreForThis);
     res.status(200).json({ message: resultJSONText });
   }
   catch (error) {
@@ -28,15 +28,17 @@ app.post('/', async (req, res) => {
   }
 });
 
-async function imageDataIntoCalendarJson(fileType, base64ImgData) {
+async function imageDataIntoCalendarJson(fileType, base64ImgData, forStr) {
   const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
+  const properForStr = (forStr) ? `${forStr}${(forStr[forStr.length - 1] != ":") ? ":" : ""}` : "";
   const prompt = 
   `Determine if there are any events in the provided image and format the results in a string containing one array filled with JSON objects called events that are the request bodies of the Event resource from the Google Calendar API.
   Each event must be its own JSON object, containing string-JSON object pairs for "start" and "end", and string-string pair "summary" as provided below. 
-  Ensure the JSON objects for "start" and "end" have a "date" or "dateTime" field depending on whether a time can be determined for the event, and a "timeZone" field. 
-  If a time and date are provided for an event but the specific start and/or end times cannot be confidently determined, use "date" instead of "dateTime" for the event and have the date of the event be the date provided, with no time included in the event. 
+  Ensure the JSON objects for "start" and "end" have either the "date" or "dateTime" field, and a "timeZone" field whenever the "dateTime" field is used. 
+  Only use the "dateTime" field when an event has a date and visible start and end times associated with the event.
+  If a date is provided for an event but two times aren't associated to that event, treat it as an all-day event and use the "date" field for the event instead.
   If a time zone cannot be confidently determined, have the time zone be "America/New_York".
-  Ensure the string for "summary" is directly copied from the provided image to represent what the event is for.
+  Ensure the string for "summary" is directly copied from the provided image to represent what the event is for, append to the following string: ${properForStr}.
 
   Do not include events where dates for either "start" and "end" are not able to be determined.
   Do not include any more properties aside from those previously mentioned and reminders. The format for the reminders property is given in the event JSON object provided and shouldn't be changed.
@@ -48,9 +50,8 @@ async function imageDataIntoCalendarJson(fileType, base64ImgData) {
     "reminders": {
       "useDefault": false,
       "overrides": [
-        {"method": "email", "minutes": 10080},
         {"method": "popup", "minutes": 10080},
-        {"method": "email", "minutes": 1440},
+        {"method": "popup", "minutes": 2880},
         {"method": "popup", "minutes": 1440}
       ]
     }
@@ -72,7 +73,7 @@ async function imageDataIntoCalendarJson(fileType, base64ImgData) {
     generationConfig: {
       "temperature": 0,
       "topP": 0,
-      "topK": 1,
+      "topK": 1
     }
   });
 
