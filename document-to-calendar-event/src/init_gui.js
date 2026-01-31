@@ -190,7 +190,6 @@ function init() {
 
                 const loadingAnimation = document.createElement("h1");
                 loadingAnimation.id = "loading-cover-text";
-                loadingAnimation.style.marginBottom = "2.5px";
                 loadingAnimation.style.padding = "2.5px";
                 setSomeText(loadingAnimation, "Analyzing Image...");
                 changeBackgroundColor(loadingAnimation, "white");
@@ -241,15 +240,23 @@ function init() {
         textboxCheckboxLabel.htmlFor = "show-event-textbox-checkbox";
         setSomeText(textboxCheckboxLabel, "Allow Textbox To Specify Event Purpose");
 
+        const textboxCheckboxContainer = document.createElement("div");
+        textboxCheckboxContainer.style.display = "flex"; 
+        textboxCheckboxContainer.style.flexDirection = "row";
+        textboxCheckboxContainer.style.justifyContent = "center";
+        textboxCheckboxContainer.style.alignItems = "center";
+        textboxCheckboxContainer.appendChild(textboxCheckbox);
+        textboxCheckboxContainer.appendChild(textboxCheckboxLabel);
+
         const saveButton = document.createElement("button");
+        saveButton.style.padding = "1.5px";
         setSomeText(saveButton, "Save Changes");
         saveButton.onclick = function () {
             showEventsForTextbox = textboxCheckbox.checked;
             document.body.removeChild(cover);
         }
 
-        cover.appendChild(textboxCheckbox);
-        cover.appendChild(textboxCheckboxLabel);
+        cover.appendChild(textboxCheckboxContainer);
         cover.appendChild(saveButton);
     };
 }
@@ -371,6 +378,7 @@ function setBarebonsCover() {
     cover.style.flexDirection = "column";
     cover.style.justifyContent = "center";
     cover.style.alignItems = "center";
+    cover.style.gap = "2.5px";
     document.body.appendChild(cover);
 
     return cover;
