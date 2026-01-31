@@ -5,6 +5,13 @@ class NoEventsError extends Error {
     }
 }
 
+class TooBigFileError extends Error {
+    constructor() {
+        super("Document provided is too big, specifically bigger than the 2MB limit.");
+        this.name = 'TooBigFileError';
+    }
+}
+
 const ogHeight = document.body.clientHeight + "px";
 const theHTMLElement = document.querySelector('html');
 const screenshotButton = document.getElementById("screenshot-btn");
@@ -121,8 +128,8 @@ function init() {
     };
     uploadButton.onclick = function () { fileSelector.click(); };
     fileSelector.onchange = function () {
-        if (fileSelector.files && fileSelector.files.length == 1) {
-            setSomeText(fileSelectedText, fileSelector.files[0].name && fileSelector.files[0].size <= maxFileByteSize);
+        if (fileSelector.files && fileSelector.files.length == 1 && fileSelector.files[0].size <= maxFileByteSize) {
+            setSomeText(fileSelectedText, fileSelector.files[0].name);
 
             const reader = new FileReader();
             if (fileSelector.files && fileSelector.files[0]) {
@@ -143,6 +150,7 @@ function init() {
                 makeObjectHidden(orText);
             }
         }
+        else if (fileSelector.files[0].size > maxFileByteSize) {setFinishLoadPopup(new TooBigFileError());}
     };
     cancelFileButton.onclick = function () {
         setSomeText(fileSelectedText, "");
@@ -210,23 +218,27 @@ function init() {
         else {console.error("This button shouldn't be visible, let alone clickable, at this very moment. ERROR!");}
 
         //temporary popup 
-        if (error) {
-            let errorText = "Unexpected Error. Try again later.";
-            if (error.name == "AbortError") {errorText = "Process Aborted";}
-            else if (error.name == "NoEventsError") {errorText = "Image With No Events";}
-
-            changeBackgroundColor(finishLoadPopup, "red");
-            setSomeText(finishLoadPopup, errorText);
-        }
-        else {
-            changeBackgroundColor(finishLoadPopup, "greenyellow");
-            setSomeText(finishLoadPopup, "Processed Events");
-        }
-        makeObjectVisible(finishLoadPopup);
-        setTimeout(() => {
-            makeObjectHidden(finishLoadPopup);
-        }, finishLoadPopupVisibleMS);
+        setFinishLoadPopup(error);
     };
+}
+function setFinishLoadPopup(error) {
+    if (error) {
+        let errorText = "Unexpected Error. Try again later.";
+        if (error.name == "AbortError") {errorText = "Process Aborted";}
+        else if (error.name == "NoEventsError") {errorText = "Image With No Events";}
+        else if (error.name == "TooBigFileError") {errorText = "Provide Documents <= 2MB";}
+
+        changeBackgroundColor(finishLoadPopup, "red");
+        setSomeText(finishLoadPopup, errorText);
+    }
+    else {
+        changeBackgroundColor(finishLoadPopup, "greenyellow");
+        setSomeText(finishLoadPopup, "Processed Events");
+    }
+    makeObjectVisible(finishLoadPopup);
+    setTimeout(() => {
+        makeObjectHidden(finishLoadPopup);
+    }, finishLoadPopupVisibleMS);
 }
 function allItemsPresent(items) {
     let result = true;
