@@ -1,13 +1,10 @@
 import { GoogleGenAI } from '@google/genai';
 import express from 'express';
 import cors from 'cors';
-// import dotenv from 'dotenv';
 
-// dotenv.config();
 const app = express();
 const port = 3000;
 const jsonByteLimit = 20000010;
-// const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 app.use(express.json({limit: jsonByteLimit})); // max size of 20mb + 10bytes (20mb max image size for gemini + longest file type str being 10 bytes long)
 app.use(cors());
@@ -29,7 +26,7 @@ app.post('/', async (req, res) => {
 });
 
 async function imageDataIntoCalendarJson(fileType, base64ImgData) {
-  const ai = new GoogleGenAI({/*apiKey: GEMINI_API_KEY*/});
+  const ai = new GoogleGenAI({});
   const prompt = 
   `Determine if there are any events in the provided image and format the results in a string containing one array filled with JSON objects called events that are the request bodies of the Event resource from the Google Calendar API.
   Each event must be its own JSON object, containing string-JSON object pairs for "start" and "end", and string-string pair "summary" as provided below. 
