@@ -77,10 +77,7 @@ function init() {
         screenshotInProgress = true;
         makeObjectHidden(selectedFileImage);
         makeObjectHidden(submitButton);
-        if (showEventsForTextbox) {
-            setDisabledForObj(eventsForTextbox, false);
-            makeObjectVisible(eventsForTextbox);
-        }
+        setEventTextboxVisibilityControlled(false);
 
         setTimeout(() => { // time delay to reduce very awkward, abrupt shrinking and growing
             if (screenshotInProgress) {
@@ -115,6 +112,7 @@ function init() {
         makeObjectVisible(selectedFileImage);
         makeObjectVisible(submitButton);
         forceExtensionHeight(theHTMLElement, ogHeight);
+        setEventTextboxVisibilityControlled(true);
     };
     uploadButton.onmouseover = function () {
         makeObjectHidden(screenshotButton);
@@ -137,10 +135,7 @@ function init() {
     uploadButton.onclick = function () {fileSelector.click();};
     fileSelector.onchange = function () {
         if (fileSelector.files && fileSelector.files.length == 1 && fileSelector.files[0].size <= maxFileByteSize) {
-            if (showEventsForTextbox) {
-                setDisabledForObj(eventsForTextbox, false);
-                makeObjectVisible(eventsForTextbox);
-            }
+            setEventTextboxVisibilityControlled(true);
             setSomeText(fileSelectedText, fileSelector.files[0].name);
 
             const reader = new FileReader();
@@ -167,10 +162,7 @@ function init() {
     cancelFileButton.onclick = function () {
         setSomeText(fileSelectedText, "");
         makeObjectHidden(cancelFileButton);
-        if (showEventsForTextbox) {
-            setDisabledForObj(eventsForTextbox, true);
-            makeObjectHidden(eventsForTextbox);
-        }
+        setEventTextboxVisibilityControlled(false);
 
         if (fileChosen) {resetPopupFromFileUpload();}
         else if (screenshotInProgress) {resetPopupFromScreenshotInProgress();}
@@ -253,6 +245,8 @@ function init() {
         setSomeText(saveButton, "Save Changes");
         saveButton.onclick = function () {
             showEventsForTextbox = textboxCheckbox.checked;
+            if (screenshotTaken || fileChosen) {setEventTextboxVisibility(showEventsForTextbox);}
+
             document.body.removeChild(cover);
         }
 
@@ -325,6 +319,14 @@ function removeImageChanges() {
     selectedFileImage.src = '';
     selectedFileImage.removeAttribute("style");
 }
+function setEventTextboxVisibility(isVisible) {
+    setDisabledForObj(eventsForTextbox, !isVisible);
+    if (isVisible) {makeObjectVisible(eventsForTextbox);}
+    else {makeObjectHidden(eventsForTextbox);}
+}
+function setEventTextboxVisibilityControlled(isVisible) {
+    if (showEventsForTextbox) {setEventTextboxVisibility(isVisible);}
+}
 function resetPopupFromFileUpload() {
     fileChosen = false;
     hideFlexContainer(fileSelectorContent);
@@ -333,10 +335,7 @@ function resetPopupFromFileUpload() {
     makeObjectVisible(orText);
     removeImageChanges();
     turnInputBlack(fileSelector);
-    if (showEventsForTextbox) {
-        setDisabledForObj(eventsForTextbox, true);
-        makeObjectHidden(eventsForTextbox);
-    }
+    setEventTextboxVisibilityControlled(false);
 }
 function resetPopupFromScreenshotInProgress() {
     screenshotInProgress = false;
@@ -344,10 +343,7 @@ function resetPopupFromScreenshotInProgress() {
     showFlexContainer(miscButtonContainer);
     showFlexContainer(textContainer);
     forceExtensionHeight(theHTMLElement, ogHeight);
-    if (showEventsForTextbox) {
-        setDisabledForObj(eventsForTextbox, true);
-        makeObjectHidden(eventsForTextbox);
-    }
+    setEventTextboxVisibilityControlled(false);
 }
 function resetPopupFromScreenhotTaken() {
     screenshotTaken = false;
@@ -356,10 +352,7 @@ function resetPopupFromScreenhotTaken() {
     makeObjectVisible(orText);
     makeObjectVisible(uploadButton);
     removeImageChanges();
-    if (showEventsForTextbox) {
-        setDisabledForObj(eventsForTextbox, true);
-        makeObjectHidden(eventsForTextbox);
-    }
+    setEventTextboxVisibilityControlled(false);
 }
 function setDisabledForButtons(isDisabled) {
     setDisabledForObj(submitButton, isDisabled);
