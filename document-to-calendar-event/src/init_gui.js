@@ -240,18 +240,20 @@ function init() {
         textboxCheckboxContainer.appendChild(textboxCheckbox);
         textboxCheckboxContainer.appendChild(textboxCheckboxLabel);
 
-        const saveButton = document.createElement("button");
-        saveButton.style.padding = "1.5px";
-        setSomeText(saveButton, "Save Changes");
-        saveButton.onclick = function () {
+        const backButton = document.createElement("button");
+        backButton.style.padding = "1.5px";
+        backButton.style.position = "absolute";
+        backButton.style.top = "5px";
+        backButton.style.left = "5px";
+        setSomeText(backButton, "<--");
+        backButton.onclick = function () {
             showEventsForTextbox = textboxCheckbox.checked;
             if (screenshotTaken || fileChosen) {setEventTextboxVisibility(showEventsForTextbox);}
-
             document.body.removeChild(cover);
         }
 
         cover.appendChild(textboxCheckboxContainer);
-        cover.appendChild(saveButton);
+        cover.appendChild(backButton);
     };
 }
 function setFinishLoadPopup(error) {
