@@ -221,24 +221,9 @@ function init() {
     settingsButton.onclick = function () {
         const cover = setBarebonsCover();
         changeBackgroundColor(cover, "gray");
-        
-        const textboxCheckbox = document.createElement("input");
-        textboxCheckbox.type = "checkbox";
-        textboxCheckbox.id = "show-event-textbox-checkbox";
-        textboxCheckbox.value = "true";
-        textboxCheckbox.checked = showEventsForTextbox;
 
-        const textboxCheckboxLabel = document.createElement("label");
-        textboxCheckboxLabel.htmlFor = "show-event-textbox-checkbox";
-        setSomeText(textboxCheckboxLabel, "Allow Textbox To Specify Event Purpose");
-
-        const textboxCheckboxContainer = document.createElement("div");
-        textboxCheckboxContainer.style.display = "flex"; 
-        textboxCheckboxContainer.style.flexDirection = "row";
-        textboxCheckboxContainer.style.justifyContent = "center";
-        textboxCheckboxContainer.style.alignItems = "center";
-        textboxCheckboxContainer.appendChild(textboxCheckbox);
-        textboxCheckboxContainer.appendChild(textboxCheckboxLabel);
+        const textboxCheckboxContainer = createEventCheckbox();
+        const customTimeZoneContainer = createCustomDropdown();
 
         const backButton = document.createElement("button");
         backButton.style.padding = "1.5px";
@@ -247,12 +232,13 @@ function init() {
         backButton.style.left = "5px";
         setSomeText(backButton, "<--");
         backButton.onclick = function () {
-            showEventsForTextbox = textboxCheckbox.checked;
             if (screenshotTaken || fileChosen) {setEventTextboxVisibility(showEventsForTextbox);}
+
             document.body.removeChild(cover);
         }
 
         cover.appendChild(textboxCheckboxContainer);
+        cover.appendChild(customTimeZoneContainer);
         cover.appendChild(backButton);
     };
 }
@@ -377,6 +363,50 @@ function setBarebonsCover() {
     document.body.appendChild(cover);
 
     return cover;
+}
+function createBasicFlexContainer(childElements) {
+    const container = document.createElement("div");
+    container.style.display = "flex"; 
+    container.style.flexDirection = "row";
+    container.style.justifyContent = "center";
+    container.style.alignItems = "center";
+
+    for (let child of childElements) {container.appendChild(child);}
+    return container;
+}
+function createEventCheckbox() {
+    const textboxCheckbox = document.createElement("input");
+    textboxCheckbox.type = "checkbox";
+    textboxCheckbox.id = "show-event-textbox-checkbox";
+    textboxCheckbox.value = "true";
+    textboxCheckbox.checked = showEventsForTextbox;
+    textboxCheckbox.onchange = function () {showEventsForTextbox = textboxCheckbox.checked;}
+
+    const textboxCheckboxLabel = document.createElement("label");
+    textboxCheckboxLabel.htmlFor = "show-event-textbox-checkbox";
+    setSomeText(textboxCheckboxLabel, "Allow Textbox To Specify Event Purpose");
+
+    return createBasicFlexContainer([textboxCheckboxLabel, textboxCheckbox]);
+}
+function createCustomDropdown() {
+    const times = [
+        -12, -11, -10, -9.5, -9, -8, -7, -6, -5, -4, -3.5, -3, -2, -1, 
+        0, 1, 2, 3, 3.5, 4, 4.5, 5, 5.5, 5.75, 6, 6.5, 7, 8, 8.75, 9, 9.5, 10, 10.5, 11, 12, 12.75, 13, 14
+    ];
+    const customTimeZoneDropdown = document.createElement("select");
+    customTimeZoneDropdown.id = "custom-timezone-dropdown";
+    for (let time of times) {
+        const option = document.createElement("option");
+        if (time == 5) {option.selected = true;}
+        setSomeText(option, `UTC${time}`);
+        customTimeZoneDropdown.appendChild(option);
+    }
+
+    const customTimeZoneLabel = document.createElement("label");
+    customTimeZoneLabel.htmlFor = "custom-timezone-dropdown";
+    setSomeText(customTimeZoneLabel, "Selected Timezone");
+
+    return createBasicFlexContainer([customTimeZoneLabel, customTimeZoneDropdown]);
 }
 async function imageDataToObject() {
     // access google gemini in the backend
