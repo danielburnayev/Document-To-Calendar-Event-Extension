@@ -36,6 +36,7 @@ const visualTimeBufferMS = 100;
 const finishLoadPopupVisibleMS = 1500;
 const maxFileByteSize = 2000000;
 let controller = new AbortController();
+let currTimeZone = "Etc/GMT+5"; //UTC-05:00
 let fileChosen = false;
 let screenshotTaken = false;
 let screenshotInProgress = false;
@@ -390,17 +391,58 @@ function createEventCheckbox() {
 }
 function createCustomDropdown() {
     const times = [
-        -12, -11, -10, -9.5, -9, -8, -7, -6, -5, -4, -3.5, -3, -2, -1, 
-        0, 1, 2, 3, 3.5, 4, 4.5, 5, 5.5, 5.75, 6, 6.5, 7, 8, 8.75, 9, 9.5, 10, 10.5, 11, 12, 12.75, 13, 14
+        {time: "-12:00", zone: "Etc/GMT+12"},
+        {time: "-11:00", zone: "Etc/GMT+11"}, 
+        {time: "-10:00", zone: "Etc/GMT+10"}, 
+        {time: "-09:30", zone: "Pacific/Marquesas"}, 
+        {time: "-09:00", zone: "Etc/GMT+9"}, 
+        {time: "-08:00", zone: "Etc/GMT+8"}, 
+        {time: "-07:00", zone: "Etc/GMT+7"}, 
+        {time: "-06:00", zone: "Etc/GMT+6"}, 
+        {time: "-05:00", zone: "Etc/GMT+5"}, 
+        {time: "-04:00", zone: "Etc/GMT+4"}, 
+        {time: "-03:30", zone: "America/St_Johns"}, 
+        {time: "-03:00", zone: "Etc/GMT+3"}, 
+        {time: "-02:00", zone: "Etc/GMT+2"}, 
+        {time: "-01:00", zone: "Etc/GMT+1"}, 
+        {time: "+00:00", zone: "Etc/GMT0"},
+        {time: "+01:00", zone: "Etc/GMT-1"},
+        {time: "+02:00", zone: "Etc/GMT-2"}, 
+        {time: "+03:00", zone: "Etc/GMT-3"},
+        {time: "+03:30", zone: "Asia/Tehran"}, 
+        {time: "+04:00", zone: "Etc/GMT-4"}, 
+        {time: "+04:30", zone: "Asia/Kabul"},
+        {time: "+05:00", zone: "Etc/GMT-5"}, 
+        {time: "+05:30", zone: "Asia/Calcutta"}, 
+        {time: "+05:45", zone: "Asia/Katmandu"},
+        {time: "+06:00", zone: "Etc/GMT-6"}, 
+        {time: "+06:30", zone: "Asia/Rangoon"}, 
+        {time: "+07:00", zone: "Etc/GMT-7"},
+        {time: "+08:00", zone: "Etc/GMT-8"}, 
+        {time: "+08:45", zone: "Australia/Eucla"}, 
+        {time: "+09:00", zone: "Etc/GMT-9"}, 
+        {time: "+09:30", zone: "Australia/Adelaide"}, 
+        {time: "+10:00", zone: "Etc/GMT-10"}, 
+        {time: "+10:30", zone: "Australia/Lord_Howe"}, 
+        {time: "+11:00", zone: "Etc/GMT-11"}, 
+        {time: "+12:00", zone: "Etc/GMT-12"}, 
+        {time: "+12:45", zone: "Pacific/Chatham"}, 
+        {time: "+13:00", zone: "Etc/GMT-13"}, 
+        {time: "+14:00", zone: "Etc/GMT-14"}
     ];
     const customTimeZoneDropdown = document.createElement("select");
     customTimeZoneDropdown.id = "custom-timezone-dropdown";
-    for (let time of times) {
+    for (let obj of times) {
+        const time = obj.time;
+        const zone = obj.zone;
         const option = document.createElement("option");
-        if (time == 5) {option.selected = true;}
+
+        if (zone == currTimeZone) {option.selected = true;}
+        option.value = zone;
         setSomeText(option, `UTC${time}`);
         customTimeZoneDropdown.appendChild(option);
     }
+    customTimeZoneDropdown.onchange = function () {currTimeZone = customTimeZoneDropdown.value;}
 
     const customTimeZoneLabel = document.createElement("label");
     customTimeZoneLabel.htmlFor = "custom-timezone-dropdown";
@@ -414,6 +456,7 @@ async function imageDataToObject() {
     const message = {
         fileType: fileType,
         imageData: base64ImgData,
+        timeZone: currTimeZone,
         eventsAreForThis: eventsForTextbox.value
     };
     turnInputBlack(eventsForTextbox);

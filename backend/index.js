@@ -20,7 +20,7 @@ app.post('/', async (req, res) => {
   const body = req.body;
 
   try {
-    const resultJSONText = await imageDataIntoCalendarJson(body.fileType, body.imageData, body.eventsAreForThis);
+    const resultJSONText = await imageDataIntoCalendarJson(body.fileType, body.imageData, body.timeZone, body.eventsAreForThis);
     res.status(200).json({ message: resultJSONText });
   }
   catch (error) {
@@ -28,7 +28,7 @@ app.post('/', async (req, res) => {
   }
 });
 
-async function imageDataIntoCalendarJson(fileType, base64ImgData, forStr) {
+async function imageDataIntoCalendarJson(fileType, base64ImgData, timeZone, forStr) {
   const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY});
   const properForStr = (forStr) ? `${forStr}${(forStr[forStr.length - 1] != ":") ? ":" : ""}` : "";
   const prompt = 
@@ -37,7 +37,7 @@ async function imageDataIntoCalendarJson(fileType, base64ImgData, forStr) {
   Ensure the JSON objects for "start" and "end" have either the "date" or "dateTime" field, and a "timeZone" field whenever the "dateTime" field is used. 
   Only use the "dateTime" field when an event has a date and visible start and end times associated with the event.
   If a date is provided for an event but two times aren't associated to that event, treat it as an all-day event and use the "date" field for the event instead.
-  If a time zone cannot be confidently determined, have the time zone be "America/New_York".
+  Have the "timeZone" field be ${timeZone}, if the field is needed for an event.
   Ensure the string for "summary" is directly copied from the provided image to represent what the event is for, append to the following string: ${properForStr}.
 
   Do not include events where dates for either "start" and "end" are not able to be determined.
@@ -57,7 +57,7 @@ async function imageDataIntoCalendarJson(fileType, base64ImgData, forStr) {
     }
   }
 
-  The string result should be an array consisting of these events if events can be identified. If they cannot have the string be: "[]".`;
+  The string result should be an array consisting of these events if events can be identified. If they cannot, have the string be: "[]".`;
 
   const result = await ai.models.generateContent({
     model: "gemini-2.5-flash",
