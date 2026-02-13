@@ -432,6 +432,7 @@ function createCustomDropdown() {
     ];
     const customTimeZoneDropdown = document.createElement("select");
     customTimeZoneDropdown.id = "custom-timezone-dropdown";
+    customTimeZoneDropdown.style.marginLeft = "4px";
     for (let obj of times) {
         const time = obj.time;
         const zone = obj.zone;
@@ -452,7 +453,7 @@ function createCustomDropdown() {
 }
 async function imageDataToObject() {
     // access google gemini in the backend
-    const url = "http://localhost:3000";
+    const url = "https://document-to-calendar-event-backend-509566963936.us-east4.run.app";
     const message = {
         fileType: fileType,
         imageData: base64ImgData,
